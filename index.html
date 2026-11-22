@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2f57">
+<title>Rekod Bacaan Tekanan Darah (BP)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b3a6b'/%3E%3Cpath d='M32 50C14 38 12 24 20 18c5-4 10-1 12 3 2-4 7-7 12-3 8 6 6 20-12 32z' fill='white'/%3E%3C/svg%3E">
+<style>
+/* ====== Pemboleh ubah tema ====== */
+:root{
+  --bg:#f1f4f9; --card:#ffffff; --text:#15233a; --muted:#566883;
+  --primary:#0b3a6b; --primary-text:#ffffff; --accent:#e8eef7; --hdr:#0b2f57; --gold:#c9a227;
+  --border:#d3dce9; --shadow:0 1px 2px rgba(15,35,60,.08),0 4px 14px rgba(15,35,60,.06);
+  --input:#ffffff; --grid:#dde5f0;
+  --c-sys:#d6204f; --c-dia:#1d4ed8; --c-pul:#15803d;
+  --ref-ok:#16a34a; --ref-hi:#dc2626; --danger:#b91c1c;
+}
+[data-theme="dark"]{
+  --bg:#0a1424; --card:#112038; --text:#e8eef8; --muted:#9fb2cc;
+  --primary:#5aa2ff; --primary-text:#04142a; --accent:#183050; --hdr:#0e2749;
+  --border:#2a4264; --shadow:0 2px 12px rgba(0,0,0,.5);
+  --input:#0d1b30; --grid:#243a5c;
+  --c-sys:#fb7185; --c-dia:#6aa8ff; --c-pul:#4ade80;
+  --ref-ok:#4ade80; --ref-hi:#f87171; --danger:#f87171;
+}
+*{box-sizing:border-box}
+html{font-size:18px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45;transition:background .25s,color .25s}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.hide{display:none!important}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ====== Header & navigasi ====== */
+header.app{position:sticky;top:0;z-index:20;background:var(--hdr);color:#fff;border-bottom:3px solid var(--gold);display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;padding-top:calc(.55rem + env(safe-area-inset-top))}
+header.app h1{font-size:1.05rem;margin:0;flex:1;line-height:1.2}
+header.app .hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:inherit;border-radius:10px;min-width:44px;height:44px;padding:0 .7rem;cursor:pointer;font-weight:700}
+nav#nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:var(--card);border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(0,0,0,.12);padding-bottom:env(safe-area-inset-bottom)}
+nav#nav button{flex:1;background:none;border:0;padding:.45rem .1rem .4rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;font-weight:600;color:var(--muted);min-height:58px}
+nav#nav button .ic{font-size:1.35rem;line-height:1}
+nav#nav button.active{color:var(--primary);box-shadow:inset 0 3px 0 var(--primary)}
+main{max-width:980px;margin:0 auto;padding:.9rem .8rem 110px}
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (min-width:900px){
+  nav#nav{position:sticky;top:60px;bottom:auto;justify-content:center;border-top:0;border-bottom:1px solid var(--border);box-shadow:none;padding-bottom:0}
+  nav#nav button{flex:0 0 140px;flex-direction:row;justify-content:center;gap:.5rem;font-size:.95rem;min-height:50px}
+  main{padding-bottom:40px}
+}
+
+/* ====== Kad & komponen ====== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:.9rem;box-shadow:var(--shadow)}
+.card h2{font-size:1.1rem;margin:0 0 .7rem}
+h2.vt{font-size:1.3rem;margin:.2rem 0 .8rem}
+.grid{display:grid;gap:.7rem}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g5{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+@media (max-width:560px){.g3{grid-template-columns:1fr}}
+.mini{background:var(--accent);border-radius:12px;padding:.7rem .8rem;border-left:6px solid var(--primary)}
+.mini .k{font-size:.8rem;color:var(--muted);font-weight:600}
+.mini .v{font-size:1.5rem;font-weight:800;line-height:1.15}
+.mini .s{font-size:.85rem;color:var(--muted)}
+.badge{display:inline-block;padding:.15rem .6rem;border-radius:999px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.banner{border-radius:12px;padding:.7rem .9rem;margin-bottom:.7rem;background:#fff3cd;color:#4a3500;border:1px solid #e6c34d;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.banner .btn{margin-left:auto}
+.banner.info{background:#dbeafe;color:#102a56;border-color:#93b4ec}
+[data-theme="dark"] .banner{background:#4a3b0a;color:#ffe9a6;border-color:#8a6d12}
+[data-theme="dark"] .banner.info{background:#13294d;color:#cfe0ff;border-color:#2f5aa8}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:48px;padding:.5rem 1.1rem;border-radius:12px;border:2px solid var(--primary);background:var(--card);color:var(--primary);font-weight:700;cursor:pointer;transition:transform .1s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--primary);color:var(--primary-text)}
+.btn.danger{border-color:var(--danger);color:var(--danger)}
+.btn.danger.fill{background:var(--danger);color:#fff}
+.btn.sm{min-height:40px;padding:.3rem .8rem;font-size:.9rem}
+.btns{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
+
+label.lbl,legend{display:block;font-weight:700;margin-bottom:.3rem;font-size:.95rem;padding:0}
+fieldset{border:0;margin:0 0 .9rem;padding:0;min-width:0}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=datetime-local],select,textarea{width:100%;min-height:50px;padding:.55rem .75rem;border-radius:12px;border:2px solid var(--border);background:var(--input);color:var(--text)}
+textarea{min-height:90px;resize:vertical}
+input.big{font-size:1.7rem;font-weight:800;text-align:center}
+input.invalid{border-color:var(--danger)}
+.field{margin-bottom:.9rem}
+.row2>*,.row3>*,.rangebar>*{min-width:0}
+input[type=date],input[type=time],input[type=datetime-local]{min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}
+.err{color:var(--danger);font-size:.85rem;min-height:1.1em;font-weight:600}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.row2{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem}
+@media (max-width:420px){.row3{gap:.4rem}}
+.seg{display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:inline-block;padding:.6rem 1rem;min-height:48px;border-radius:12px;border:2px solid var(--border);background:var(--input);font-weight:600;line-height:1.7}
+.chip input:checked+span{background:var(--primary);color:var(--primary-text);border-color:var(--primary)}
+.chip input:focus-visible+span{outline:3px solid var(--primary);outline-offset:2px}
+#liveClass{min-height:2.2rem;margin:.2rem 0 .8rem}
+.crisismsg{background:#6b0f1a;color:#fff;border-radius:12px;padding:.8rem 1rem;font-weight:600;margin-top:.6rem}
+
+/* ====== Kad bacaan terkini ====== */
+.latest{border-radius:18px;padding:1.1rem 1.2rem;margin-bottom:.9rem;box-shadow:var(--shadow)}
+.latest .top{font-weight:700;opacity:.92}
+.latest .big{font-size:3.4rem;font-weight:900;line-height:1.05;margin:.2rem 0}
+.latest .big small{font-size:1rem;font-weight:600;margin-left:.4rem}
+.latest .lb{display:inline-block;background:rgba(255,255,255,.25);border:2px solid currentColor;border-radius:999px;padding:.15rem .8rem;font-weight:800;margin:.3rem 0}
+.latest .meta{opacity:.95;font-size:.9rem}
+.latest .crisismsg{background:rgba(0,0,0,.35);margin-top:.7rem}
+
+/* ====== Carta ====== */
+.chart-wrap{position:relative}
+canvas.chart{width:100%;height:290px;display:block;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--card);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:10px;padding:.35rem .6rem;font-size:.8rem;z-index:5;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin:.5rem 0;font-size:.85rem;align-items:center}
+.legend label{display:inline-flex;align-items:center;gap:.35rem;cursor:pointer;min-height:32px}
+.legend input{width:20px;height:20px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:3px}
+.refl{display:inline-block;width:22px;border-top:3px dashed}
+.rangebar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:flex-end;margin-bottom:.7rem}
+.rangebar>div{flex:1 1 150px}
+
+details{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.6rem 1rem;margin-bottom:.9rem}
+details summary{cursor:pointer;font-weight:700;min-height:36px;display:flex;align-items:center}
+details ul{margin:.4rem 0 .3rem;padding-left:1.2rem}
+details li{margin-bottom:.3rem}
+table.gd{width:100%;border-collapse:collapse;font-size:.9rem;margin:.4rem 0}
+table.gd td{padding:.35rem .4rem;border-bottom:1px solid var(--border)}
+
+/* ====== Jadual rekod ====== */
+.tablewrap{overflow-x:auto}
+table.rec{width:100%;border-collapse:collapse;font-size:.92rem}
+table.rec th{background:var(--accent);text-align:left;padding:.55rem .5rem;position:sticky;top:0;white-space:nowrap}
+table.rec td{padding:.5rem;border-bottom:1px solid var(--border);vertical-align:top}
+.bpv{font-weight:800;font-size:1.05rem;white-space:nowrap}
+.tag{font-size:.7rem;border:1px solid var(--muted);border-radius:6px;padding:0 .3rem;color:var(--muted);margin-left:.3rem}
+@media (max-width:760px){
+  table.rec thead{display:none}
+  table.rec,table.rec tbody,table.rec tr,table.rec td{display:block;width:100%}
+  table.rec tr{border:1px solid var(--border);border-radius:14px;margin-bottom:.7rem;padding:.4rem .6rem;background:var(--card)}
+  table.rec td{display:flex;justify-content:space-between;gap:1rem;border:0;padding:.25rem 0;text-align:right}
+  table.rec td::before{content:attr(data-label);font-weight:700;color:var(--muted);text-align:left;flex:0 0 38%}
+  table.rec td.act{justify-content:flex-end}
+  table.rec td.act::before{display:none}
+}
+
+/* ====== Kertas laporan (sentiasa cerah) ====== */
+.paper{background:#fff;color:#111;border:1px solid #cbd5d3;border-radius:6px;box-shadow:var(--shadow);padding:1.4rem 1.3rem;max-width:794px;margin:0 auto 1rem;font-size:14px;line-height:1.4}
+.paper h2{margin:0 0 .2rem;font-size:1.35em;text-align:center;color:#0b2f57}
+.paper h3{margin:1em 0 .4em;font-size:1.05em;border-bottom:2px solid #0b3a6b;padding-bottom:.15em;color:#0b2f57}
+.paper .sub{text-align:center;color:#444;margin-bottom:.8em}
+.paper table{width:100%;border-collapse:collapse}
+.paper .info td{padding:.15em .3em;vertical-align:top}
+.paper .info td:first-child{font-weight:700;width:30%;white-space:nowrap}
+.paper table.t td,.paper table.t th{border:1px solid #9aa8bd;padding:.25em .35em;font-size:.88em;text-align:left}
+.paper table.t th{background:#e6edf6}
+.paper thead{display:table-header-group}
+.paper tr{break-inside:avoid}
+.paper .sumgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4em}
+.paper .sumgrid div{border:1px solid #9aa8bd;border-radius:6px;padding:.3em .5em}
+.paper .sumgrid b{display:block;font-size:1.15em}
+.paper img.chartimg{width:100%;height:auto;display:block;border:1px solid #cfd8e4}
+.paper .sign{display:flex;gap:2em;margin-top:2.6em;break-inside:avoid}
+.paper .sign div{flex:1;border-top:1px solid #111;padding-top:.3em;text-align:center;font-size:.9em}
+.paper .disc{margin-top:1.2em;padding:.5em .7em;border:1px solid #888;border-radius:6px;font-size:.82em;background:#f6f6f6}
+.paper .badge{font-size:.8em}
+
+footer.app{max-width:980px;margin:0 auto;padding:0 .9rem 1.2rem;font-size:.85rem;color:var(--muted)}
+footer.app p{margin:.3rem 0}
+
+/* ====== Modal & toast ====== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem}
+.mbox{background:var(--card);color:var(--text);border-radius:18px;max-width:460px;width:100%;padding:1.2rem;box-shadow:0 10px 40px rgba(0,0,0,.4);max-height:90vh;overflow:auto}
+.mbox h2{margin:0 0 .5rem;font-size:1.2rem}
+.mbox.crisis{border:4px solid #6b0f1a}
+.mbtns{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:flex-end;margin-top:1rem}
+#toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,20px);background:#0b2f57;color:#fff;padding:.7rem 1.1rem;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s;z-index:120;max-width:92vw;text-align:center;font-weight:600}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (min-width:900px){#toast{bottom:30px}}
+
+/* ====== Responsif: telefon kecil & desktop ====== */
+@media screen and (max-width:700px){
+  .paper{overflow-x:auto;padding:1rem .8rem}
+  .paper table.t{min-width:640px}
+  .paper .sumgrid{grid-template-columns:repeat(2,1fr)}
+  .latest .big{font-size:3rem}
+}
+@media (max-width:380px){html{font-size:16.5px}.btn{padding:.5rem .8rem}}
+@media (min-width:900px){
+  html{font-size:17px}
+  main{max-width:1180px;padding:1.2rem 1.2rem 40px}
+  header.app{padding-left:max(1.2rem,calc((100vw - 1180px)/2 + 1.2rem));padding-right:max(1.2rem,calc((100vw - 1180px)/2 + 1.2rem))}
+  canvas.chart{height:340px}
+  footer.app{max-width:1180px;padding:0 1.2rem 1.2rem}
+  .card,.latest{margin-bottom:0}
+  .card{padding:1.2rem 1.3rem}
+  /* Utama: dua lajur */
+  #view-home.active{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:stretch}
+  #view-home > #banners,#view-home > div.card:nth-of-type(n+4){grid-column:1/-1}
+  #view-home > #banners:empty{display:none}
+  #view-home > details{margin-bottom:0;align-self:start}
+  #latestCard,#latestCard .latest,#latestCard .card{height:100%}
+  #latestCard .latest{display:flex;flex-direction:column;justify-content:center}
+  #view-home .g3{grid-template-columns:repeat(3,1fr)}
+  /* Tambah: kad dipusatkan, kumpulan pilihan dua lajur */
+  #view-add.active .card{max-width:860px;margin:0 auto}
+  #bpForm .seg{gap:.6rem}
+  /* Tetapan: dua lajur */
+  #view-settings.active{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+  #view-settings > h2.vt{grid-column:1/-1;margin-bottom:0}
+  #view-report .report-controls .card{margin-bottom:1rem}
+  #view-records .card{margin-bottom:1rem}
+  .rangebar>div{flex:0 1 220px}
+}
+/* ====== Desktop ringkas: borang & halaman padat ====== */
+.stat-cols>div{margin-bottom:1rem}
+.stat-cols h2{margin-bottom:.5rem}
+@media (min-width:900px){
+  html{font-size:16px}
+  main{padding-top:.9rem}
+  h2.vt{margin:0 0 .6rem;font-size:1.2rem}
+  .card{padding:.9rem 1.1rem}
+  .card h2{font-size:1rem;margin-bottom:.5rem}
+  input[type=text],input[type=number],input[type=date],input[type=time],input[type=datetime-local],select{min-height:42px;padding:.35rem .65rem}
+  .btn{min-height:42px;padding:.35rem 1rem}
+  .btn.sm{min-height:32px;padding:.15rem .7rem;font-size:.85rem}
+  .field{margin-bottom:.6rem}
+  fieldset{margin-bottom:.6rem}
+  .chip span{padding:.35rem .8rem;min-height:42px;line-height:1.7}
+  .mini{padding:.5rem .7rem}.mini .v{font-size:1.35rem}
+  /* Utama */
+  #banners{display:flex;gap:.8rem}
+  #banners .banner{flex:1;margin:0;padding:.5rem .8rem}
+  .latest{padding:.8rem 1.1rem}.latest .big{font-size:3rem}
+  canvas.chart{height:280px}
+  .stat-cols{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:1rem}
+  .stat-cols>div{margin-bottom:0}
+  .stat-cols .g2{grid-template-columns:1fr}
+  .stat-cols .g5{grid-template-columns:1fr 1fr}
+  #view-home .rangebar{margin-bottom:.4rem}
+  /* Tambah: semua medan dalam satu skrin */
+  #view-add.active .card{max-width:1000px}
+  #bpForm{display:grid;grid-template-columns:repeat(12,1fr);gap:0 1rem;align-items:start}
+  #bpForm>*{grid-column:1/-1}
+  #bpForm>.f-dt{grid-column:span 4}
+  #bpForm>.f-nums{grid-column:span 8}
+  #bpForm>.fs-period{grid-column:span 5}
+  #bpForm>.fs-arm{grid-column:span 3}
+  #bpForm>.fs-pos{grid-column:span 4}
+  #bpForm>.fs-med{grid-column:span 7}
+  #bpForm>.f-note{grid-column:span 5}
+  #bpForm input.big{font-size:1.4rem;min-height:46px}
+  #bpForm textarea{min-height:48px;height:48px}
+  #liveClass{min-height:1.8rem;margin:0 0 .4rem}
+  #bpForm .btns{margin-top:.2rem}
+  /* Rekod: penapis satu baris */
+  #view-records > .card:first-of-type{display:grid;grid-template-columns:repeat(4,1fr);gap:0 .8rem;align-items:end}
+  #view-records > .card:first-of-type .row2{display:contents}
+  #view-records > .card:first-of-type > .field{grid-column:span 2}
+  #view-records > .card:first-of-type .btns{grid-column:span 2;margin:0 0 .6rem;justify-content:flex-end;align-items:center}
+  table.rec{font-size:.85rem}table.rec td{padding:.35rem .45rem}table.rec th{padding:.4rem .45rem}
+  .bpv{font-size:1rem}
+  /* Laporan: kawalan dua lajur */
+  #view-report .report-controls{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;align-items:start}
+  #view-report .report-controls>h2{grid-column:1/-1;margin:0}
+  #view-report .report-controls .card{margin:0}
+  #view-report .report-controls .btns{margin-top:.4rem}
+  #view-report .report-controls .rangebar{margin-bottom:.2rem}
+  /* Tetapan */
+  #view-settings.active{gap:.8rem}
+}
+@media (min-width:1280px){
+  #view-settings.active{grid-template-columns:repeat(3,1fr)}
+}
+
+
+/* ====== Laporan: butang ringkas pada telefon ====== */
+@media (max-width:899px){
+  #view-report .report-controls .card{padding:.7rem .8rem;margin-bottom:.6rem}
+  #view-report .report-controls .btns{display:grid;grid-template-columns:repeat(2,1fr);gap:.4rem;margin-top:.5rem}
+  #view-report .report-controls .btn{min-height:40px;padding:.25rem .4rem;font-size:.82rem;white-space:nowrap}
+  #view-report .report-controls .card:nth-of-type(2) .btns{grid-template-columns:repeat(3,1fr)}
+  #view-report .report-controls .rangebar{gap:.4rem;margin-bottom:0}
+  #view-report .report-controls .rangebar>div{flex:1 1 100px}
+  #view-report .report-controls .rangebar select,#view-report .report-controls .rangebar input{min-height:40px;font-size:.9rem}
+  #view-report .report-controls .card h2{font-size:.95rem;margin-bottom:.3rem}
+  #view-report .report-controls p.muted{font-size:.75rem!important;margin-top:.5rem}
+}
+
+/* ====== Cetak ====== */
+@media print{
+  @page{size:A4;margin:12mm}
+  html,body{background:#fff!important;font-size:12px}
+  header.app,#nav,footer.app,#toast,.overlay,.report-controls,.view:not(#view-report){display:none!important}
+  #view-report{display:block!important;animation:none!important}
+  main{padding:0;max-width:none}
+  .paper{box-shadow:none!important;border:0!important;padding:0!important;max-width:none!important;margin:0!important;font-size:11px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<header class="app">
+  <h1 data-i18n="app.title">Rekod Bacaan Tekanan Darah (BP)</h1>
+  <button class="hbtn" id="btnLang" type="button" data-i18n-aria="aria.lang" aria-label="Tukar bahasa">EN</button>
+  <button class="hbtn" id="btnTheme" type="button" data-i18n-aria="aria.theme" aria-label="Tukar mod cerah/gelap">🌙</button>
+</header>
+
+<nav id="nav" data-i18n-aria="aria.nav" aria-label="Navigasi utama">
+  <button type="button" data-view="home"><span class="ic" aria-hidden="true">🏠</span><span data-i18n="nav.home">Utama</span></button>
+  <button type="button" data-view="add"><span class="ic" aria-hidden="true">➕</span><span data-i18n="nav.add">Tambah</span></button>
+  <button type="button" data-view="records"><span class="ic" aria-hidden="true">📋</span><span data-i18n="nav.records">Rekod</span></button>
+  <button type="button" data-view="report"><span class="ic" aria-hidden="true">🖨️</span><span data-i18n="nav.report">Laporan</span></button>
+  <button type="button" data-view="settings"><span class="ic" aria-hidden="true">⚙️</span><span data-i18n="nav.settings">Tetapan</span></button>
+</nav>
+
+<main>
+<!-- ========== UTAMA ========== -->
+<section class="view" id="view-home" aria-labelledby="h_home">
+  <h2 class="sr" id="h_home" data-i18n="nav.home">Utama</h2>
+  <div id="banners" aria-live="polite"></div>
+  <div id="latestCard"></div>
+
+  <div class="card">
+    <h2 data-i18n="home.avg">Purata bacaan</h2>
+    <div class="grid g3" id="avgGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="rangebar">
+      <div>
+        <label class="lbl" for="homeRange" data-i18n="range.label">Julat tarikh</label>
+        <select id="homeRange">
+          <option value="7" data-i18n="range.7">7 hari</option>
+          <option value="30" data-i18n="range.30">30 hari</option>
+          <option value="90" data-i18n="range.90">90 hari</option>
+          <option value="all" data-i18n="range.all">Semua</option>
+          <option value="custom" data-i18n="range.custom">Tarikh tersuai</option>
+        </select>
+      </div>
+      <div class="hide" id="hrFromBox"><label class="lbl" for="hrFrom" data-i18n="range.from">Dari</label><input type="date" id="hrFrom"></div>
+      <div class="hide" id="hrToBox"><label class="lbl" for="hrTo" data-i18n="range.to">Hingga</label><input type="date" id="hrTo"></div>
+    </div>
+    <p class="muted" style="margin:0 0 .6rem;font-size:.85rem" data-i18n="home.rangeNote">Bahagian di bawah mengikut julat dipilih.</p>
+
+    <div class="stat-cols">
+      <div><h2 data-i18n="home.hilo">Tertinggi &amp; terendah</h2><div class="grid g2" id="hiloGrid"></div></div>
+      <div><h2 data-i18n="home.bycat">Bilangan bacaan mengikut kategori</h2><div class="grid g5" id="catGrid"></div></div>
+      <div><h2 data-i18n="home.ampm">Purata pagi vs malam</h2><div class="grid g2" id="ampmGrid"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="home.chart">Carta trend</h2>
+    <div class="legend" id="chartToggles">
+      <label><input type="checkbox" data-ser="sys" checked><span class="sw" style="background:var(--c-sys)"></span><span data-i18n="sys">Sistolik</span></label>
+      <label><input type="checkbox" data-ser="dia" checked><span class="sw" style="background:var(--c-dia)"></span><span data-i18n="dia">Diastolik</span></label>
+      <label><input type="checkbox" data-ser="pul" checked><span class="sw" style="background:var(--c-pul)"></span><span data-i18n="pulse">Nadi</span></label>
+    </div>
+    <div class="chart-wrap"><canvas class="chart" id="homeChart" role="img" data-i18n-aria="aria.chart" aria-label="Carta bacaan tekanan darah"></canvas><div class="tip hide" id="homeTip"></div></div>
+    <div class="legend">
+      <span><span class="refl" style="border-color:var(--ref-ok)"></span> <span data-i18n="chart.ref1">120/80 (had normal)</span></span>
+      <span><span class="refl" style="border-color:var(--ref-hi)"></span> <span data-i18n="chart.ref2">140/90 (had hipertensi)</span></span>
+    </div>
+    <p class="muted" style="margin:.2rem 0 0;font-size:.8rem" data-i18n="chart.hint">Sentuh titik pada carta untuk lihat butiran.</p>
+  </div>
+
+  <details>
+    <summary data-i18n="tips.title">Petua ukur yang betul</summary>
+    <ul id="tipsList"></ul>
+  </details>
+  <details>
+    <summary data-i18n="factors.title">Faktor yang mempengaruhi bacaan</summary>
+    <ul id="factorsList"></ul>
+  </details>
+  <details>
+    <summary data-i18n="guide.title">Panduan pengelasan bacaan</summary>
+    <table class="gd" id="guideTable"></table>
+    <p class="muted" style="font-size:.85rem" data-i18n="guide.note">Ini hanya panduan, bukan diagnosis.</p>
+  </details>
+</section>
+
+<!-- ========== TAMBAH / EDIT ========== -->
+<section class="view" id="view-add" aria-labelledby="formTitle">
+  <div class="card">
+    <h2 class="vt" id="formTitle">Tambah bacaan</h2>
+    <form id="bpForm" novalidate autocomplete="off">
+      <div class="field f-dt">
+        <label class="lbl" for="f_dt" data-i18n="form.dt">Tarikh dan masa</label>
+        <input type="datetime-local" id="f_dt" required>
+        <div class="err" id="e_dt" role="alert"></div>
+      </div>
+      <div class="row3 f-nums">
+        <div class="field">
+          <label class="lbl" for="f_sys" data-i18n="form.sys">Sistolik (mmHg)</label>
+          <input class="big" type="number" inputmode="numeric" id="f_sys" min="50" max="300" step="1" required placeholder="120">
+          <div class="err" id="e_sys" role="alert"></div>
+        </div>
+        <div class="field">
+          <label class="lbl" for="f_dia" data-i18n="form.dia">Diastolik (mmHg)</label>
+          <input class="big" type="number" inputmode="numeric" id="f_dia" min="30" max="200" step="1" required placeholder="80">
+          <div class="err" id="e_dia" role="alert"></div>
+        </div>
+        <div class="field">
+          <label class="lbl" for="f_pulse" data-i18n="form.pulse">Nadi (bpm)</label>
+          <input class="big" type="number" inputmode="numeric" id="f_pulse" min="30" max="220" step="1" placeholder="72">
+          <div class="err" id="e_pulse" role="alert"></div>
+        </div>
+      </div>
+      <div id="liveClass" aria-live="polite"></div>
+
+      <fieldset class="fs-period"><legend data-i18n="form.period">Waktu bacaan</legend><div class="seg" id="seg_period"></div></fieldset>
+      <fieldset class="fs-arm"><legend data-i18n="form.arm">Lengan</legend><div class="seg" id="seg_arm"></div></fieldset>
+      <fieldset class="fs-pos"><legend data-i18n="form.pos">Posisi</legend><div class="seg" id="seg_pos"></div></fieldset>
+      <fieldset class="fs-med"><legend data-i18n="form.med">Status ubat</legend><div class="seg" id="seg_med"></div></fieldset>
+
+      <div class="field f-note">
+        <label class="lbl" for="f_note" data-i18n="form.note">Catatan</label>
+        <textarea id="f_note" maxlength="500" data-i18n-ph="form.notePh" placeholder="cth: letih, kurang tidur, lepas bersenam, minum kopi"></textarea>
+      </div>
+      <div class="btns">
+        <button type="submit" class="btn primary" id="btnSave" data-i18n="form.save">Simpan</button>
+        <button type="button" class="btn" id="btnCancel" data-i18n="form.cancel">Batal</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ========== REKOD ========== -->
+<section class="view" id="view-records" aria-labelledby="h_rec">
+  <h2 class="vt" id="h_rec" data-i18n="rec.title">Senarai rekod</h2>
+  <div class="card">
+    <div class="row2">
+      <div class="field"><label class="lbl" for="rf_from" data-i18n="range.from">Dari</label><input type="date" id="rf_from"></div>
+      <div class="field"><label class="lbl" for="rf_to" data-i18n="range.to">Hingga</label><input type="date" id="rf_to"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="rf_period" data-i18n="form.period">Waktu bacaan</label><select id="rf_period"></select></div>
+      <div class="field"><label class="lbl" for="rf_cat" data-i18n="rec.category">Kategori</label><select id="rf_cat"></select></div>
+    </div>
+    <div class="field"><label class="lbl" for="rf_q" data-i18n="rec.search">Cari catatan</label><input type="text" id="rf_q" data-i18n-ph="rec.searchPh" placeholder="Cari dalam catatan…"></div>
+    <div class="btns" style="margin-top:0"><button type="button" class="btn sm" id="rfReset" data-i18n="rec.reset">Set semula penapis</button><span class="muted" id="recCount" style="align-self:center" aria-live="polite"></span></div>
+  </div>
+  <div class="card tablewrap">
+    <table class="rec" id="recTable">
+      <thead><tr id="recHead"></tr></thead>
+      <tbody id="recBody"></tbody>
+    </table>
+    <p class="muted hide" id="recEmpty" data-i18n="rec.empty">Tiada rekod sepadan.</p>
+  </div>
+</section>
+
+<!-- ========== LAPORAN ========== -->
+<section class="view" id="view-report" aria-labelledby="h_rep">
+  <div class="report-controls">
+    <h2 class="vt" id="h_rep" data-i18n="rep.title">Laporan &amp; eksport</h2>
+    <div class="card">
+      <div class="rangebar">
+        <div>
+          <label class="lbl" for="rpRange" data-i18n="range.label">Julat tarikh</label>
+          <select id="rpRange">
+            <option value="7" data-i18n="range.7">7 hari</option>
+            <option value="30" data-i18n="range.30" selected>30 hari</option>
+            <option value="90" data-i18n="range.90">90 hari</option>
+            <option value="all" data-i18n="range.all">Semua</option>
+            <option value="custom" data-i18n="range.custom">Tarikh tersuai</option>
+          </select>
+        </div>
+        <div class="hide" id="rpFromBox"><label class="lbl" for="rpFrom" data-i18n="range.from">Dari</label><input type="date" id="rpFrom"></div>
+        <div class="hide" id="rpToBox"><label class="lbl" for="rpTo" data-i18n="range.to">Hingga</label><input type="date" id="rpTo"></div>
+      </div>
+      <div class="btns">
+        <button type="button" class="btn primary" id="btnPrint">🖨️ <span data-i18n="rep.print">Cetak laporan</span></button>
+        <button type="button" class="btn" id="btnCsv" data-i18n="rep.csv">Eksport CSV</button>
+      </div>
+      <div class="btns">
+        <button type="button" class="btn primary" id="btnPdfPreview">👁️ <span data-i18n="rep.pdfPreview">Pratonton PDF</span></button>
+        <button type="button" class="btn primary" id="btnPdfDownload">⬇️ <span data-i18n="rep.pdfDownload">Muat turun PDF</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <h2 data-i18n="rep.data">Data &amp; backup</h2>
+      <div class="btns" style="margin-top:0">
+        <button type="button" class="btn" id="btnBackup" data-i18n="rep.backup">Backup (JSON)</button>
+        <button type="button" class="btn" id="btnRestore" data-i18n="rep.restore">Restore (JSON)</button>
+        <button type="button" class="btn" id="btnImport" data-i18n="rep.import">Import CSV/JSON</button>
+      </div>
+      <p class="muted" style="font-size:.85rem;margin-bottom:0" data-i18n="rep.dataNote">Backup/Restore guna fail JSON; Import terima CSV atau JSON. Restore menggantikan semua data semasa. Import menambah rekod baharu tanpa menggantikan yang sedia ada.</p>
+      <input type="file" id="fileIn" class="hide" accept=".json,.csv,application/json,text/csv" aria-hidden="true" tabindex="-1">
+    </div>
+    <h2 class="vt" data-i18n="rep.preview">Pratonton laporan (A4)</h2>
+  </div>
+  <div class="paper" id="paper"></div>
+</section>
+
+<!-- ========== TETAPAN ========== -->
+<section class="view" id="view-settings" aria-labelledby="h_set">
+  <h2 class="vt" id="h_set" data-i18n="nav.settings">Tetapan</h2>
+
+  <div class="card">
+    <h2 data-i18n="set.profile">Profil</h2>
+    <div class="field"><label class="lbl" for="p_name" data-i18n="set.name">Nama</label><input type="text" id="p_name" maxlength="80"></div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="p_age" data-i18n="set.age">Umur</label><input type="number" inputmode="numeric" id="p_age" min="0" max="120"></div>
+      <div class="field"><label class="lbl" for="p_gender" data-i18n="set.gender">Jantina</label>
+        <select id="p_gender"><option value=""></option><option value="male" data-i18n="gender.male">Lelaki</option><option value="female" data-i18n="gender.female">Perempuan</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="p_weight"><span data-i18n="set.weight">Berat (kg)</span> <span class="muted" data-i18n="opt">(pilihan)</span></label><input type="number" inputmode="decimal" id="p_weight" min="0" max="400" step="0.1"></div>
+      <div class="field"><label class="lbl" for="p_height"><span data-i18n="set.height">Tinggi (cm)</span> <span class="muted" data-i18n="opt">(pilihan)</span></label><input type="number" inputmode="decimal" id="p_height" min="0" max="260" step="0.1"></div>
+    </div>
+    <div class="field"><label class="lbl" for="p_meds" data-i18n="set.meds">Ubat tetap</label><textarea id="p_meds" maxlength="600"></textarea></div>
+    <div class="field"><label class="lbl" for="p_doctor" data-i18n="set.doctor">Nama doktor / klinik</label><input type="text" id="p_doctor" maxlength="120"></div>
+    <button type="button" class="btn primary" id="btnProfile" data-i18n="set.saveProfile">Simpan profil</button>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="set.reminders">Peringatan</h2>
+    <label class="chip" style="display:inline-block;margin-bottom:.8rem"><input type="checkbox" id="r_on"><span data-i18n="set.remindOn">Aktifkan peringatan</span></label>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="r_morning" data-i18n="set.morningTime">Masa pagi</label><input type="time" id="r_morning"></div>
+      <div class="field"><label class="lbl" for="r_evening" data-i18n="set.eveningTime">Masa malam</label><input type="time" id="r_evening"></div>
+    </div>
+    <p class="muted" id="notifStatus" style="font-size:.9rem;margin:.2rem 0"></p>
+    <p class="muted" style="font-size:.85rem;margin:.2rem 0 .6rem" data-i18n="set.remindNote">Peringatan hanya berfungsi semasa aplikasi dibuka dalam pelayar.</p>
+    <button type="button" class="btn sm" id="btnTestRemind" data-i18n="set.testRemind">Uji peringatan</button>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="set.appearance">Paparan</h2>
+    <div class="row2">
+      <div class="field"><label class="lbl" for="s_theme" data-i18n="set.theme">Mod</label>
+        <select id="s_theme"><option value="auto" data-i18n="theme.auto">Ikut peranti</option><option value="light" data-i18n="theme.light">Cerah</option><option value="dark" data-i18n="theme.dark">Gelap</option></select></div>
+      <div class="field"><label class="lbl" for="s_lang" data-i18n="set.language">Bahasa</label>
+        <select id="s_lang"><option value="ms">Bahasa Melayu</option><option value="en">English</option></select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="set.sample">Data contoh</h2>
+    <div class="btns" style="margin-top:0">
+      <button type="button" class="btn" id="btnDelSample" data-i18n="set.delSample">Padam data contoh</button>
+      <button type="button" class="btn" id="btnLoadSample" data-i18n="set.loadSample">Muat data contoh (14 hari)</button>
+    </div>
+    <h2 style="margin-top:1.2rem" data-i18n="set.danger">Zon bahaya</h2>
+    <button type="button" class="btn danger" id="btnDelAll" data-i18n="set.delAll">Padam semua data</button>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="priv.title">Privasi</h2>
+    <p style="margin:0" data-i18n="priv.text">Semua data disimpan pada peranti anda sahaja dan tidak dihantar ke mana-mana pelayan.</p>
+  </div>
+</section>
+</main>
+
+<footer class="app">
+  <p><strong data-i18n="priv.title">Privasi</strong>: <span data-i18n="priv.short">Data disimpan pada peranti ini sahaja; tiada penghantaran ke pelayan.</span></p>
+  <p data-i18n="disclaimer">Aplikasi ini hanya untuk rekod peribadi dan bukan pengganti nasihat, diagnosis atau rawatan doktor. Jangan ubah atau hentikan ubat tanpa nasihat doktor.</p>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   REKOD BACAAN TEKANAN DARAH (BP) — fail tunggal, luar talian
+   ===================================================================== */
+
+/* ---------- 1. TETAPAN (ubah suai ambang di sini) ---------- */
+const CONFIG = {
+  storageKey: 'bpRekod.v1',
+  sampleDays: 14,
+  // Julat pengesahan input [min, max]
+  validation: { sys: [50, 300], dia: [30, 200], pulse: [30, 220] },
+  // Ambang pengelasan (panduan sahaja). Kecemasan guna ">" ; selebihnya ">="
+  thresholds: {
+    elevatedSys: 120,           // sistolik >= 120 -> Meningkat
+    h1Sys: 130, h1Dia: 80,      // Tahap 1
+    h2Sys: 140, h2Dia: 90,      // Tahap 2
+    crisisSys: 180, crisisDia: 120 // Kecemasan (lebih daripada)
+  },
+  // Warna kelas (bg = latar, fg = teks) — kontras mencukupi
+  levels: [
+    { key: 'normal',   bg: '#15803d', fg: '#ffffff' }, // hijau
+    { key: 'elevated', bg: '#facc15', fg: '#3b2a00' }, // kuning
+    { key: 'h1',       bg: '#f97316', fg: '#2a1000' }, // oren
+    { key: 'h2',       bg: '#b91c1c', fg: '#ffffff' }, // merah
+    { key: 'crisis',   bg: '#6b0f1a', fg: '#ffffff' }  // merah tua
+  ]
+};
+
+/* ---------- 2. TERJEMAHAN ---------- */
+const I18N = {
+ms: {
+ 'app.title':'Rekod Bacaan Tekanan Darah (BP)',
+ 'aria.lang':'Tukar bahasa','aria.theme':'Tukar mod cerah atau gelap','aria.nav':'Navigasi utama','aria.chart':'Carta bacaan tekanan darah',
+ 'nav.home':'Utama','nav.add':'Tambah','nav.records':'Rekod','nav.report':'Laporan','nav.settings':'Tetapan',
+ 'sys':'Sistolik','dia':'Diastolik','pulse':'Nadi','opt':'(pilihan)','mmHg':'mmHg','bpm':'bpm','readings':'bacaan','yrs':'tahun',
+ 'home.latest':'Bacaan terkini','home.none':'Belum ada bacaan. Tekan "Tambah" untuk merekod bacaan pertama anda.',
+ 'home.avg':'Purata bacaan','avg7':'Purata 7 hari','avg30':'Purata 30 hari','avgAll':'Purata keseluruhan',
+ 'home.hilo':'Tertinggi & terendah','home.highest':'Tertinggi','home.lowest':'Terendah',
+ 'home.bycat':'Bilangan bacaan mengikut kategori','home.ampm':'Purata pagi vs malam','home.chart':'Carta trend',
+ 'home.rangeNote':'Bahagian di bawah mengikut julat tarikh yang dipilih.','home.noData':'Tiada data',
+ 'range.label':'Julat tarikh','range.7':'7 hari','range.30':'30 hari','range.90':'90 hari','range.all':'Semua','range.custom':'Tarikh tersuai','range.from':'Dari','range.to':'Hingga',
+ 'chart.ref1':'120/80 (had normal)','chart.ref2':'140/90 (had hipertensi)','chart.hint':'Sentuh titik pada carta untuk lihat butiran.','chart.empty':'Tiada data dalam julat ini',
+ 'banner.today':'Anda belum merekod bacaan hari ini.','banner.add':'Tambah','banner.sample':'Anda sedang melihat data contoh.','banner.delSample':'Padam data contoh',
+ 'banner.mem':'Storan pelayar tidak tersedia. Data hanya disimpan sementara dalam memori — gunakan Backup (JSON) di tab Laporan.',
+ 'factors.title':'Faktor yang mempengaruhi bacaan',
+ 'f1.t':'Bersenam','f1.d':'Ambil ukuran tekanan darah sebelum bersenam, atau anda akan mendapat bacaan yang tinggi.',
+ 'f2.t':'Bersarapan','f2.d':'Pada waktu pagi, ambil bacaan sebelum bersarapan kerana proses pencernaan boleh menurunkan bacaan. Jika sudah makan, tunggu 30 minit sebelum mengambil bacaan.',
+ 'f3.t':'Buang air','f3.d':'Kosongkan pundi kencing dahulu, atau bacaan anda boleh menjadi tinggi.',
+ 'f4.t':'Alkohol, kafein dan tembakau','f4.d':'Untuk bacaan tepat, tunggu 30 minit selepas minum alkohol, kafein atau merokok.',
+ 'f5.t':'Saiz manset (cuff)','f5.d':'Saiz yang tidak sesuai menyebabkan bacaan tidak tepat. Doktor boleh menunjukkan cara memasang manset dengan betul.',
+ 'f6.t':'Pakaian','f6.d':'Manset tidak boleh dipasang di atas pakaian; sebaiknya terus ke atas kulit lengan.',
+ 'f7.t':'Suhu','f7.d':'Dalam keadaan sejuk, bacaan tekanan dijangka meningkat.',
+ 'f8.t':'Kedudukan','f8.d':'Untuk hasil yang konsisten dan boleh dibandingkan, sentiasa guna lengan yang sama dan kedudukan yang betul. Elakkan duduk menyilang kaki.',
+ 'f9.t':'Tekanan (stres)','f9.d':'Elakkan berada dalam keadaan tertekan dan duduk dengan selesa sekurang-kurangnya 5 minit.',
+ 'f10.t':'Bercakap','f10.d':'Elakkan bercakap semasa mengambil tekanan darah kerana ia boleh meningkatkan bacaan.',
+ 'tips.title':'Petua ukur yang betul',
+ 'tips.1':'Duduk tenang dan bersandar selama 5 minit sebelum mengukur.',
+ 'tips.2':'Jangan minum kopi atau merokok dan elakkan bersenam selama 30 minit sebelum mengukur.',
+ 'tips.3':'Letakkan lengan di atas meja dengan manset sama aras jantung.',
+ 'tips.4':'Duduk tegak, kaki rata di lantai, jangan bersilang kaki dan jangan bercakap semasa mengukur.',
+ 'tips.5':'Ukur pada waktu yang sama setiap hari dan gunakan lengan yang sama.',
+ 'guide.title':'Panduan pengelasan bacaan','guide.note':'Ini hanya panduan (berdasarkan garis panduan Malaysia/AHA/ESC), bukan diagnosis. Kelas ditentukan oleh kategori yang lebih tinggi antara sistolik dan diastolik. Rujuk doktor anda untuk tafsiran.','guide.short':'Panduan sahaja, bukan diagnosis.',
+ 'and':'dan','or':'atau','andor':'dan/atau',
+ 'level.normal':'Optimum/Normal','level.elevated':'Meningkat','level.h1':'Hipertensi Tahap 1','level.h2':'Hipertensi Tahap 2','level.crisis':'Kecemasan',
+ 'crisis.msg':'Ulang bacaan selepas berehat 5 minit. Jika masih tinggi atau ada simptom seperti sakit dada, sesak nafas, pening teruk atau lemah anggota, dapatkan rawatan kecemasan segera.',
+ 'form.add':'Tambah bacaan','form.edit':'Edit bacaan','form.dt':'Tarikh dan masa','form.sys':'Sistolik (mmHg)','form.dia':'Diastolik (mmHg)','form.pulse':'Nadi (bpm) — pilihan',
+ 'form.period':'Waktu bacaan','form.arm':'Lengan','form.pos':'Posisi','form.med':'Status ubat','form.note':'Catatan','form.notePh':'cth: letih, kurang tidur, lepas bersenam, minum kopi',
+ 'form.save':'Simpan','form.cancel':'Batal',
+ 'err.required':'Wajib diisi','err.range':'Nilai mesti nombor bulat antara {0} dan {1}','err.dt':'Tarikh/masa tidak sah',
+ 'warn.title':'Semak bacaan anda','warn.body':'Sistolik ({0}) sepatutnya lebih tinggi daripada diastolik ({1}). Pastikan nombor tidak tertukar.','warn.fix':'Semak semula','warn.keep':'Simpan juga',
+ 'toast.saved':'Bacaan disimpan','toast.updated':'Bacaan dikemas kini','toast.deleted':'Rekod dipadam','toast.profile':'Profil disimpan',
+ 'period.morning':'Pagi','period.noon':'Tengah hari','period.evening':'Petang','period.night':'Malam',
+ 'arm.left':'Kiri','arm.right':'Kanan','pos.sit':'Duduk','pos.lie':'Berbaring','pos.stand':'Berdiri',
+ 'med.before':'Sebelum ubat','med.after':'Selepas ubat','med.none':'Tiada ubat',
+ 'rec.title':'Senarai rekod','rec.category':'Kategori','rec.search':'Cari catatan','rec.searchPh':'Cari dalam catatan…','rec.reset':'Set semula penapis','rec.count':'{0} rekod','rec.empty':'Tiada rekod sepadan.',
+ 'rec.allPeriods':'Semua waktu','rec.allCats':'Semua kategori','rec.edit':'Edit','rec.del':'Padam','rec.sample':'Contoh',
+ 'rec.delTitle':'Padam rekod?','rec.delBody':'Rekod ini akan dipadam dan tidak boleh dikembalikan.',
+ 'col.dt':'Tarikh & masa','col.bp':'BP (mmHg)','col.pulse':'Nadi','col.class':'Kelas','col.period':'Waktu','col.arm':'Lengan','col.pos':'Posisi','col.med':'Ubat','col.note':'Catatan','col.act':'Tindakan',
+ 'rep.pdfPreview':'Papar PDF','rep.pdfDownload':'Simpan PDF','rep.pdfFail':'PDF gagal dijana.','rep.pdfPopup':'Pratonton disekat oleh pelayar; PDF dimuat turun sebaliknya.','rep.page':'Halaman',
+ 'rep.title':'Laporan & eksport','rep.print':'Cetak','rep.csv':'CSV','rep.data':'Data & backup','rep.backup':'Backup','rep.restore':'Restore','rep.import':'Import',
+ 'rep.dataNote':'Backup/Restore guna fail JSON; Import terima CSV atau JSON. Restore menggantikan semua data semasa. Import menambah rekod baharu tanpa menggantikan yang sedia ada.','rep.preview':'Pratonton laporan (A4)',
+ 'rep.heading':'LAPORAN BACAAN TEKANAN DARAH','rep.patient':'Nama','rep.age':'Umur','rep.gender':'Jantina','rep.wh':'Berat / Tinggi','rep.meds':'Ubat tetap','rep.doctor':'Doktor / Klinik',
+ 'rep.range':'Julat tarikh','rep.generated':'Dijana pada','rep.summary':'Ringkasan','rep.n':'Bilangan bacaan','rep.avgBP':'Purata BP','rep.avgPulse':'Purata nadi','rep.hi':'Tertinggi','rep.lo':'Terendah',
+ 'rep.chart':'Carta','rep.table':'Jadual bacaan','rep.noData':'Tiada bacaan dalam julat ini.','rep.signP':'Tandatangan pesakit','rep.signD':'Tandatangan / cop doktor','rep.date':'Tarikh','rep.cats':'Bilangan mengikut kategori',
+ 'rep.classNote':'Pengelasan hanya panduan, bukan diagnosis.',
+ 'set.profile':'Profil','set.name':'Nama','set.age':'Umur','set.gender':'Jantina','set.weight':'Berat (kg)','set.height':'Tinggi (cm)','set.meds':'Ubat tetap (teks bebas)','set.doctor':'Nama doktor / klinik','set.saveProfile':'Simpan profil',
+ 'gender.male':'Lelaki','gender.female':'Perempuan',
+ 'set.reminders':'Peringatan','set.remindOn':'Aktifkan peringatan','set.morningTime':'Masa pagi','set.eveningTime':'Masa malam','set.testRemind':'Uji peringatan',
+ 'set.remindNote':'Peringatan hanya berfungsi semasa aplikasi dibuka dalam pelayar.',
+ 'notif.unsupported':'Notifikasi tidak disokong pada pelayar ini. Peringatan dipaparkan sebagai sepanduk dalam aplikasi.','notif.granted':'Notifikasi dibenarkan.','notif.denied':'Notifikasi disekat. Peringatan dipaparkan sebagai sepanduk dalam aplikasi.','notif.default':'Notifikasi belum dibenarkan.',
+ 'remind.title':'Masa mengukur tekanan darah','remind.morning':'Sudah tiba masa bacaan pagi anda.','remind.evening':'Sudah tiba masa bacaan malam anda.','remind.test':'Ini ialah ujian peringatan.',
+ 'set.appearance':'Paparan','set.theme':'Mod','set.language':'Bahasa','theme.auto':'Ikut peranti','theme.light':'Cerah','theme.dark':'Gelap',
+ 'set.sample':'Data contoh','set.delSample':'Padam data contoh','set.loadSample':'Muat data contoh (14 hari)','set.danger':'Zon bahaya','set.delAll':'Padam semua data',
+ 'sample.none':'Tiada data contoh untuk dipadam.','sample.deleted':'{0} rekod contoh dipadam','sample.loaded':'Data contoh dimuatkan','sample.n1':'Kurang tidur','sample.n2':'Lepas bersenam','sample.n3':'Letih','sample.n4':'Minum kopi pagi tadi',
+ 'delall.title':'Padam semua data?','delall.body':'Semua rekod dan profil akan dipadam. Buat Backup dahulu jika perlu. Tindakan ini tidak boleh dikembalikan.','delall.done':'Semua data dipadam',
+ 'priv.title':'Privasi','priv.text':'Semua data disimpan pada peranti anda sahaja (localStorage pelayar) dan tidak dihantar ke mana-mana pelayan. Buat Backup (JSON) secara berkala kerana data boleh hilang jika data pelayar dipadam.','priv.short':'Data disimpan pada peranti ini sahaja; tiada penghantaran ke pelayan.',
+ 'io.badFile':'Fail tidak sah atau tidak dapat dibaca.','io.imported':'Import selesai: {0} ditambah, {1} dilangkau (duplikat/tidak sah).','io.restoreTitle':'Restore data?','io.restoreBody':'Semua data semasa akan diganti dengan {0} rekod daripada fail ini.','io.restoreBtn':'Ya, ganti','io.restored':'Data dipulihkan ({0} rekod)','io.exported':'Fail dimuat turun','io.csvOnlyImport':'Restore memerlukan fail JSON. Gunakan Import untuk CSV.',
+ 'ok':'OK','cancel':'Batal','close':'Tutup',
+ 'disclaimer':'Aplikasi ini hanya untuk rekod peribadi dan bukan pengganti nasihat, diagnosis atau rawatan doktor. Jangan ubah atau hentikan ubat tanpa nasihat doktor.',
+ 'crisis.saved':'Bacaan kecemasan'
+},
+en: {
+ 'app.title':'Blood Pressure (BP) Reading Log',
+ 'aria.lang':'Change language','aria.theme':'Switch light or dark mode','aria.nav':'Main navigation','aria.chart':'Blood pressure readings chart',
+ 'nav.home':'Home','nav.add':'Add','nav.records':'Records','nav.report':'Report','nav.settings':'Settings',
+ 'sys':'Systolic','dia':'Diastolic','pulse':'Pulse','opt':'(optional)','mmHg':'mmHg','bpm':'bpm','readings':'readings','yrs':'years',
+ 'home.latest':'Latest reading','home.none':'No readings yet. Tap "Add" to record your first reading.',
+ 'home.avg':'Average readings','avg7':'7-day average','avg30':'30-day average','avgAll':'Overall average',
+ 'home.hilo':'Highest & lowest','home.highest':'Highest','home.lowest':'Lowest',
+ 'home.bycat':'Readings by category','home.ampm':'Morning vs night average','home.chart':'Trend chart',
+ 'home.rangeNote':'Sections below follow the selected date range.','home.noData':'No data',
+ 'range.label':'Date range','range.7':'7 days','range.30':'30 days','range.90':'90 days','range.all':'All','range.custom':'Custom dates','range.from':'From','range.to':'To',
+ 'chart.ref1':'120/80 (normal limit)','chart.ref2':'140/90 (hypertension limit)','chart.hint':'Tap a point on the chart for details.','chart.empty':'No data in this range',
+ 'banner.today':'You have not recorded a reading today.','banner.add':'Add','banner.sample':'You are viewing sample data.','banner.delSample':'Delete sample data',
+ 'banner.mem':'Browser storage is unavailable. Data is only kept temporarily in memory — use Backup (JSON) in the Report tab.',
+ 'factors.title':'Factors that affect your reading',
+ 'f1.t':'Exercise','f1.d':'Measure before exercising, or you will get a higher reading.',
+ 'f2.t':'Breakfast','f2.d':'In the morning, measure before breakfast because digestion can lower the reading. If you have eaten, wait 30 minutes before measuring.',
+ 'f3.t':'Urination','f3.d':'Empty your bladder first, or your reading may be higher.',
+ 'f4.t':'Alcohol, caffeine and tobacco','f4.d':'For an accurate reading, wait 30 minutes after alcohol, caffeine or smoking.',
+ 'f5.t':'Cuff size','f5.d':'A cuff of the wrong size gives inaccurate readings. Your doctor can show you how to fit the cuff correctly.',
+ 'f6.t':'Clothing','f6.d':'Do not place the cuff over clothing; place it directly on the bare skin of the upper arm.',
+ 'f7.t':'Temperature','f7.d':'In cold conditions, blood pressure readings are expected to rise.',
+ 'f8.t':'Position','f8.d':'For consistent, comparable results, always use the same arm and the correct position. Avoid sitting with crossed legs.',
+ 'f9.t':'Stress','f9.d':'Avoid being stressed and sit comfortably for at least 5 minutes.',
+ 'f10.t':'Talking','f10.d':'Do not talk while measuring because it can raise the reading.',
+ 'tips.title':'How to measure correctly',
+ 'tips.1':'Sit quietly with your back supported for 5 minutes before measuring.',
+ 'tips.2':'No coffee or smoking, and avoid exercise, for 30 minutes before measuring.',
+ 'tips.3':'Rest your arm on a table with the cuff at heart level.',
+ 'tips.4':'Sit upright, feet flat on the floor, legs uncrossed, and do not talk while measuring.',
+ 'tips.5':'Measure at the same times each day using the same arm.',
+ 'guide.title':'Classification guide','guide.note':'This is a guide only (based on Malaysian/AHA/ESC guidelines), not a diagnosis. The class is set by the higher category of systolic and diastolic. Consult your doctor for interpretation.','guide.short':'Guide only, not a diagnosis.',
+ 'and':'and','or':'or','andor':'and/or',
+ 'level.normal':'Optimal/Normal','level.elevated':'Elevated','level.h1':'Hypertension Stage 1','level.h2':'Hypertension Stage 2','level.crisis':'Emergency',
+ 'crisis.msg':'Repeat the reading after resting for 5 minutes. If it is still high or you have symptoms such as chest pain, shortness of breath, severe dizziness or limb weakness, seek emergency care immediately.',
+ 'form.add':'Add reading','form.edit':'Edit reading','form.dt':'Date and time','form.sys':'Systolic (mmHg)','form.dia':'Diastolic (mmHg)','form.pulse':'Pulse (bpm) — optional',
+ 'form.period':'Time of day','form.arm':'Arm','form.pos':'Position','form.med':'Medication status','form.note':'Notes','form.notePh':'e.g. tired, poor sleep, after exercise, had coffee',
+ 'form.save':'Save','form.cancel':'Cancel',
+ 'err.required':'Required','err.range':'Enter a whole number between {0} and {1}','err.dt':'Invalid date/time',
+ 'warn.title':'Please check your reading','warn.body':'Systolic ({0}) should be higher than diastolic ({1}). Make sure the numbers are not swapped.','warn.fix':'Check again','warn.keep':'Save anyway',
+ 'toast.saved':'Reading saved','toast.updated':'Reading updated','toast.deleted':'Record deleted','toast.profile':'Profile saved',
+ 'period.morning':'Morning','period.noon':'Afternoon','period.evening':'Evening','period.night':'Night',
+ 'arm.left':'Left','arm.right':'Right','pos.sit':'Sitting','pos.lie':'Lying','pos.stand':'Standing',
+ 'med.before':'Before medication','med.after':'After medication','med.none':'No medication',
+ 'rec.title':'Records','rec.category':'Category','rec.search':'Search notes','rec.searchPh':'Search in notes…','rec.reset':'Reset filters','rec.count':'{0} records','rec.empty':'No matching records.',
+ 'rec.allPeriods':'All times','rec.allCats':'All categories','rec.edit':'Edit','rec.del':'Delete','rec.sample':'Sample',
+ 'rec.delTitle':'Delete record?','rec.delBody':'This record will be deleted and cannot be recovered.',
+ 'col.dt':'Date & time','col.bp':'BP (mmHg)','col.pulse':'Pulse','col.class':'Class','col.period':'Time','col.arm':'Arm','col.pos':'Position','col.med':'Medication','col.note':'Notes','col.act':'Actions',
+ 'rep.pdfPreview':'View PDF','rep.pdfDownload':'Save PDF','rep.pdfFail':'Could not generate the PDF.','rep.pdfPopup':'Preview was blocked by the browser; the PDF was downloaded instead.','rep.page':'Page',
+ 'rep.title':'Report & export','rep.print':'Print','rep.csv':'CSV','rep.data':'Data & backup','rep.backup':'Backup','rep.restore':'Restore','rep.import':'Import',
+ 'rep.dataNote':'Backup/Restore use a JSON file; Import accepts CSV or JSON. Restore replaces all current data. Import adds new records without replacing existing ones.','rep.preview':'Report preview (A4)',
+ 'rep.heading':'BLOOD PRESSURE READING REPORT','rep.patient':'Name','rep.age':'Age','rep.gender':'Gender','rep.wh':'Weight / Height','rep.meds':'Regular medication','rep.doctor':'Doctor / Clinic',
+ 'rep.range':'Date range','rep.generated':'Generated on','rep.summary':'Summary','rep.n':'Number of readings','rep.avgBP':'Average BP','rep.avgPulse':'Average pulse','rep.hi':'Highest','rep.lo':'Lowest',
+ 'rep.chart':'Chart','rep.table':'Readings table','rep.noData':'No readings in this range.','rep.signP':'Patient signature','rep.signD':'Doctor signature / stamp','rep.date':'Date','rep.cats':'Count by category',
+ 'rep.classNote':'Classification is a guide only, not a diagnosis.',
+ 'set.profile':'Profile','set.name':'Name','set.age':'Age','set.gender':'Gender','set.weight':'Weight (kg)','set.height':'Height (cm)','set.meds':'Regular medication (free text)','set.doctor':'Doctor / clinic name','set.saveProfile':'Save profile',
+ 'gender.male':'Male','gender.female':'Female',
+ 'set.reminders':'Reminders','set.remindOn':'Enable reminders','set.morningTime':'Morning time','set.eveningTime':'Evening time','set.testRemind':'Test reminder',
+ 'set.remindNote':'Reminders only work while the app is open in the browser.',
+ 'notif.unsupported':'Notifications are not supported in this browser. Reminders are shown as in-app banners.','notif.granted':'Notifications allowed.','notif.denied':'Notifications blocked. Reminders are shown as in-app banners.','notif.default':'Notifications not yet allowed.',
+ 'remind.title':'Time to measure your blood pressure','remind.morning':'It is time for your morning reading.','remind.evening':'It is time for your evening reading.','remind.test':'This is a test reminder.',
+ 'set.appearance':'Appearance','set.theme':'Mode','set.language':'Language','theme.auto':'Follow device','theme.light':'Light','theme.dark':'Dark',
+ 'set.sample':'Sample data','set.delSample':'Delete sample data','set.loadSample':'Load sample data (14 days)','set.danger':'Danger zone','set.delAll':'Delete all data',
+ 'sample.none':'No sample data to delete.','sample.deleted':'{0} sample records deleted','sample.loaded':'Sample data loaded','sample.n1':'Poor sleep','sample.n2':'After exercise','sample.n3':'Tired','sample.n4':'Had coffee this morning',
+ 'delall.title':'Delete all data?','delall.body':'All records and the profile will be deleted. Make a Backup first if needed. This cannot be undone.','delall.done':'All data deleted',
+ 'priv.title':'Privacy','priv.text':'All data is stored on your device only (browser localStorage) and is never sent to any server. Make a Backup (JSON) regularly because data can be lost if browser data is cleared.','priv.short':'Data is stored on this device only; nothing is sent to a server.',
+ 'io.badFile':'Invalid or unreadable file.','io.imported':'Import complete: {0} added, {1} skipped (duplicate/invalid).','io.restoreTitle':'Restore data?','io.restoreBody':'All current data will be replaced with {0} records from this file.','io.restoreBtn':'Yes, replace','io.restored':'Data restored ({0} records)','io.exported':'File downloaded','io.csvOnlyImport':'Restore needs a JSON file. Use Import for CSV.',
+ 'ok':'OK','cancel':'Cancel','close':'Close',
+ 'disclaimer':'This app is for personal records only and is not a substitute for a doctor\'s advice, diagnosis or treatment. Do not change or stop medication without your doctor\'s advice.',
+ 'crisis.saved':'Emergency reading'
+}};
+
+/* ---------- 3. UTILITI ---------- */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const pad = n => String(n).padStart(2, '0');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+let LANG = 'ms';
+function t(key, ...a) {
+  let s = (I18N[LANG] && I18N[LANG][key]) || I18N.ms[key] || key;
+  a.forEach((v, i) => { s = s.split('{' + i + '}').join(v); });
+  return s;
+}
+
+function toLocalInput(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function parseDT(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(s || '');
+  return m ? new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) : null;
+}
+function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function fmtDate(s) { const d = typeof s === 'string' ? parseDT(s) : s; return d ? pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear() : ''; }
+function fmtTime(s) { const d = typeof s === 'string' ? parseDT(s) : s; return d ? pad(d.getHours()) + ':' + pad(d.getMinutes()) : ''; }
+function periodFromHour(h) { return h >= 4 && h < 11 ? 'morning' : h >= 11 && h < 15 ? 'noon' : h >= 15 && h < 19 ? 'evening' : 'night'; }
+const num = v => (v === null || v === undefined || v === '' ? null : Number(v));
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+const r0 = v => (v == null ? '–' : String(Math.round(v)));
+
+/* ---------- 4. STORAN (localStorage + fallback memori) ---------- */
+const Store = (function () {
+  const mem = {}; let ok = true;
+  try { localStorage.setItem('__bp_t', '1'); localStorage.removeItem('__bp_t'); } catch (e) { ok = false; }
+  return {
+    get(k) { if (k in mem) return mem[k]; if (ok) { try { return localStorage.getItem(k); } catch (e) { ok = false; } } return null; },
+    set(k, v) { mem[k] = v; if (ok) { try { localStorage.setItem(k, v); } catch (e) { ok = false; } } return ok; },
+    memoryOnly() { return !ok; }
+  };
+})();
+
+/* ---------- 5. KEADAAN APLIKASI ---------- */
+const DEFAULTS = () => ({
+  records: [],
+  profile: { name: '', age: '', gender: '', weight: '', height: '', meds: '', doctor: '' },
+  settings: { lang: 'ms', theme: null, sampleLoaded: false, remind: { on: false, morning: '07:30', evening: '21:00', last: {} } }
+});
+let S = DEFAULTS();
+const UI = { series: { sys: true, dia: true, pul: true }, editingId: null, periodTouched: false, importMode: 'merge' };
+
+function loadState() {
+  try {
+    const raw = Store.get(CONFIG.storageKey);
+    if (!raw) return;
+    const o = JSON.parse(raw), d = DEFAULTS();
+    S.records = Array.isArray(o.records) ? o.records.map(normRecord).filter(Boolean) : [];
+    S.profile = Object.assign(d.profile, o.profile || {});
+    S.settings = Object.assign(d.settings, o.settings || {});
+    S.settings.remind = Object.assign(d.settings.remind, (o.settings && o.settings.remind) || {});
+    if (!S.settings.remind.last) S.settings.remind.last = {};
+  } catch (e) { S = DEFAULTS(); }
+}
+function saveState() { Store.set(CONFIG.storageKey, JSON.stringify(S)); }
+
+/* ---------- 6. PENGELASAN ---------- */
+function levelIndex(sys, dia) {
+  const T = CONFIG.thresholds; let s = 0, d = 0;
+  if (sys > T.crisisSys) s = 4; else if (sys >= T.h2Sys) s = 3; else if (sys >= T.h1Sys) s = 2; else if (sys >= T.elevatedSys) s = 1;
+  if (dia > T.crisisDia) d = 4; else if (dia >= T.h2Dia) d = 3; else if (dia >= T.h1Dia) d = 2;
+  return Math.max(s, d);
+}
+const levelOf = r => CONFIG.levels[levelIndex(r.sys, r.dia)];
+const levelLabel = lv => t('level.' + lv.key);
+const badge = lv => '<span class="badge" style="background:' + lv.bg + ';color:' + lv.fg + '">' + esc(levelLabel(lv)) + '</span>';
+
+/* ---------- 7. REKOD: normalisasi, julat, statistik ---------- */
+const OPTS = { period: ['morning', 'noon', 'evening', 'night'], arm: ['left', 'right'], pos: ['sit', 'lie', 'stand'], med: ['before', 'after', 'none'] };
+
+function normRecord(o) {
+  if (!o || typeof o !== 'object') return null;
+  let dt = typeof o.dt === 'string' ? o.dt.replace(' ', 'T').slice(0, 16) : '';
+  const d = parseDT(dt); if (!d) return null;
+  const V = CONFIG.validation;
+  const sys = Math.round(Number(o.sys)), dia = Math.round(Number(o.dia));
+  if (!(sys >= V.sys[0] && sys <= V.sys[1] && dia >= V.dia[0] && dia <= V.dia[1])) return null;
+  let pulse = num(o.pulse); pulse = pulse == null || isNaN(pulse) ? null : Math.round(pulse);
+  if (pulse != null && !(pulse >= V.pulse[0] && pulse <= V.pulse[1])) pulse = null;
+  const pick = (k, def) => OPTS[k].includes(o[k]) ? o[k] : def;
+  return { id: o.id ? String(o.id) : uid(), dt, sys, dia, pulse,
+    period: pick('period', periodFromHour(d.getHours())), arm: pick('arm', 'left'), pos: pick('pos', 'sit'), med: pick('med', 'none'),
+    note: String(o.note || '').slice(0, 500), sample: !!o.sample };
+}
+const sortedDesc = () => S.records.slice().sort((a, b) => (a.dt < b.dt ? 1 : a.dt > b.dt ? -1 : 0));
+const sortedAsc = () => S.records.slice().sort((a, b) => (a.dt < b.dt ? -1 : a.dt > b.dt ? 1 : 0));
+
+function rangeBounds(key, fromStr, toStr) {
+  const now = new Date(); let from = null, to = null;
+  if (key === 'custom') { if (fromStr) from = new Date(fromStr + 'T00:00:00'); if (toStr) to = new Date(toStr + 'T23:59:59'); }
+  else if (key !== 'all') { from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (Number(key) - 1)); }
+  return { from, to };
+}
+function filterByRange(list, b) { return list.filter(r => { const d = parseDT(r.dt); return (!b.from || d >= b.from) && (!b.to || d <= b.to); }); }
+function avgOf(list) {
+  const p = list.filter(r => r.pulse != null).map(r => r.pulse);
+  return { n: list.length, sys: mean(list.map(r => r.sys)), dia: mean(list.map(r => r.dia)), pulse: mean(p) };
+}
+function extremes(list) {
+  if (!list.length) return null;
+  let hi = list[0], lo = list[0];
+  list.forEach(r => {
+    if (r.sys > hi.sys || (r.sys === hi.sys && r.dia > hi.dia)) hi = r;
+    if (r.sys < lo.sys || (r.sys === lo.sys && r.dia < lo.dia)) lo = r;
+  });
+  return { hi, lo };
+}
+
+/* ---------- 8. UI: modal, toast ---------- */
+function modal(o) {
+  return new Promise(resolve => {
+    const prev = document.activeElement;
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    const box = document.createElement('div'); box.className = 'mbox ' + (o.cls || '');
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'mTitle');
+    box.innerHTML = '<h2 id="mTitle">' + esc(o.title) + '</h2><div>' + (o.html || '<p style="margin:0">' + esc(o.body || '') + '</p>') + '</div><div class="mbtns"></div>';
+    const bar = $('.mbtns', box);
+    function close(v) { document.removeEventListener('keydown', onKey, true); ov.remove(); if (prev && prev.focus) prev.focus(); resolve(v); }
+    function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); close(null); } }
+    (o.buttons || [{ label: t('ok'), value: true, cls: 'primary' }]).forEach(b => {
+      const bt = document.createElement('button'); bt.type = 'button'; bt.className = 'btn ' + (b.cls || ''); bt.textContent = b.label;
+      bt.addEventListener('click', () => close(b.value)); bar.appendChild(bt);
+    });
+    ov.appendChild(box); document.body.appendChild(ov);
+    document.addEventListener('keydown', onKey, true);
+    const first = $('.btn.primary', box) || $('.btn', box); if (first) first.focus();
+  });
+}
+const confirmBox = (title, body, okLabel, danger) => modal({ title, body, buttons: [
+  { label: t('cancel'), value: false }, { label: okLabel, value: true, cls: danger ? 'danger fill' : 'primary' }] });
+function toast(msg, ms) {
+  const el = $('#toast'); el.textContent = msg; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), ms || 2600);
+}
+
+/* ---------- 9. BAHASA & TEMA ---------- */
+function applyLang() {
+  LANG = S.settings.lang === 'en' ? 'en' : 'ms';
+  document.documentElement.lang = LANG === 'en' ? 'en' : 'ms';
+  document.title = t('app.title');
+  $$('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  $$('[data-i18n-ph]').forEach(el => { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
+  $$('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
+  $('#btnLang').textContent = LANG === 'ms' ? 'EN' : 'BM';
+  $('#s_lang').value = LANG;
+  buildFilterSelects();
+  updateFormTitle();
+  renderAll();
+}
+function effectiveTheme() {
+  if (S.settings.theme === 'light' || S.settings.theme === 'dark') return S.settings.theme;
+  try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'light'; }
+}
+function applyTheme() {
+  const th = effectiveTheme();
+  document.documentElement.setAttribute('data-theme', th);
+  $('#btnTheme').textContent = th === 'dark' ? '☀️' : '🌙';
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', th === 'dark' ? '#0e2749' : '#0b2f57');
+  $('#s_theme').value = S.settings.theme || 'auto';
+  if (currentView === 'home') drawHomeChart();
+}
+
+/* ---------- 10. NAVIGASI ---------- */
+let currentView = 'home';
+function showView(name) {
+  currentView = name;
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  $$('#nav button').forEach(b => {
+    const on = b.dataset.view === name; b.classList.toggle('active', on);
+    if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  if (name === 'home') renderHome();
+  if (name === 'records') renderRecords();
+  if (name === 'report') renderReport();
+  if (name === 'settings') renderSettings();
+  window.scrollTo(0, 0);
+}
+function renderAll() { renderHome(); renderRecords(); renderReport(); renderSettings(); }
+
+/* ---------- 11. UTAMA (dashboard) ---------- */
+function homeBounds() { return rangeBounds($('#homeRange').value, $('#hrFrom').value, $('#hrTo').value); }
+function mini(label, bpHtml, sub, color) {
+  return '<div class="mini" style="border-left-color:' + color + '"><div class="k">' + esc(label) + '</div><div class="v">' + bpHtml + '</div><div class="s">' + sub + '</div></div>';
+}
+function renderBanners() {
+  let h = '';
+  const today = dayKey(new Date());
+  if (Store.memoryOnly()) h += '<div class="banner" role="alert">⚠️ ' + esc(t('banner.mem')) + '</div>';
+  if (S.records.some(r => r.sample)) h += '<div class="banner info"><span>ℹ️ ' + esc(t('banner.sample')) + '</span><button type="button" class="btn sm" data-act="delSample">' + esc(t('banner.delSample')) + '</button></div>';
+  if (!S.records.some(r => r.dt.slice(0, 10) === today && !r.sample)) h += '<div class="banner"><span>🔔 ' + esc(t('banner.today')) + '</span><button type="button" class="btn sm primary" data-act="goAdd">' + esc(t('banner.add')) + '</button></div>';
+  $('#banners').innerHTML = h;
+}
+function renderLatest() {
+  const el = $('#latestCard'); const latest = sortedDesc()[0];
+  if (!latest) { el.innerHTML = '<div class="card"><h2>' + esc(t('home.latest')) + '</h2><p class="muted" style="margin:0">' + esc(t('home.none')) + '</p></div>'; return; }
+  const lv = levelOf(latest);
+  el.innerHTML = '<div class="latest" style="background:' + lv.bg + ';color:' + lv.fg + '" role="region" aria-label="' + esc(t('home.latest')) + '">' +
+    '<div class="top">' + esc(t('home.latest')) + ' · ' + fmtDate(latest.dt) + ' ' + fmtTime(latest.dt) + '</div>' +
+    '<div class="big">' + latest.sys + '/' + latest.dia + '<small>mmHg</small></div>' +
+    (latest.pulse != null ? '<div>❤ ' + esc(t('pulse')) + ' ' + latest.pulse + ' bpm</div>' : '') +
+    '<div class="lb">' + esc(levelLabel(lv)) + '</div>' +
+    '<div class="meta">' + esc(t('period.' + latest.period)) + ' · ' + esc(t('arm.' + latest.arm)) + ' · ' + esc(t('pos.' + latest.pos)) + ' · ' + esc(t('med.' + latest.med)) + '</div>' +
+    '<div class="meta" style="margin-top:.3rem">' + esc(t('guide.short')) + '</div>' +
+    (lv.key === 'crisis' ? '<div class="crisismsg" role="alert">⚠️ ' + esc(t('crisis.msg')) + '</div>' : '') + '</div>';
+}
+function renderAverages() {
+  const all = S.records, b7 = rangeBounds('7'), b30 = rangeBounds('30');
+  const sets = [['avg7', filterByRange(all, b7)], ['avg30', filterByRange(all, b30)], ['avgAll', all]];
+  $('#avgGrid').innerHTML = sets.map(([k, list]) => {
+    const a = avgOf(list);
+    if (!a.n) return mini(t(k), '–', esc(t('home.noData')), 'var(--border)');
+    const lv = CONFIG.levels[levelIndex(Math.round(a.sys), Math.round(a.dia))];
+    return mini(t(k), r0(a.sys) + '/' + r0(a.dia), esc(t('pulse')) + ' ' + r0(a.pulse) + ' · ' + a.n + ' ' + esc(t('readings')), lv.bg);
+  }).join('');
+}
+function renderRangeStats(list) {
+  // Tertinggi & terendah
+  const ex = extremes(list);
+  $('#hiloGrid').innerHTML = ex ? [['home.highest', ex.hi], ['home.lowest', ex.lo]].map(([k, r]) => {
+    const lv = levelOf(r);
+    return mini(t(k), r.sys + '/' + r.dia, fmtDate(r.dt) + ' ' + fmtTime(r.dt) + ' · ' + esc(levelLabel(lv)), lv.bg);
+  }).join('') : '<p class="muted" style="margin:0">' + esc(t('home.noData')) + '</p>';
+  // Bilangan mengikut kategori
+  $('#catGrid').innerHTML = CONFIG.levels.map((lv, i) => {
+    const n = list.filter(r => levelIndex(r.sys, r.dia) === i).length;
+    return '<div class="mini" style="border-left-color:' + lv.bg + '"><div class="k">' + badge(lv) + '</div><div class="v">' + n + '</div></div>';
+  }).join('');
+  // Purata pagi vs malam
+  $('#ampmGrid').innerHTML = [['morning', 'period.morning'], ['night', 'period.night']].map(([p, k]) => {
+    const a = avgOf(list.filter(r => r.period === p));
+    return a.n ? mini(t(k), r0(a.sys) + '/' + r0(a.dia), esc(t('pulse')) + ' ' + r0(a.pulse) + ' · ' + a.n + ' ' + esc(t('readings')), CONFIG.levels[levelIndex(Math.round(a.sys), Math.round(a.dia))].bg)
+             : mini(t(k), '–', esc(t('home.noData')), 'var(--border)');
+  }).join('');
+}
+function renderGuide() {
+  const T = CONFIG.thresholds, A = ' ' + t('and') + ' ', O = ' ' + t('or') + ' ', AO = ' ' + t('andor') + ' ';
+  const rule = {
+    normal: '< ' + T.elevatedSys + A + '< ' + T.h1Dia,
+    elevated: T.elevatedSys + '–' + (T.h1Sys - 1) + A + '< ' + T.h1Dia,
+    h1: T.h1Sys + '–' + (T.h2Sys - 1) + O + T.h1Dia + '–' + (T.h2Dia - 1),
+    h2: '≥ ' + T.h2Sys + O + '≥ ' + T.h2Dia,
+    crisis: '> ' + T.crisisSys + AO + '> ' + T.crisisDia
+  };
+  $('#guideTable').innerHTML = CONFIG.levels.map(lv => '<tr><td>' + badge(lv) + '</td><td>' + esc(rule[lv.key]) + '</td></tr>').join('');
+  $('#factorsList').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(i => '<li><b>' + esc(t('f' + i + '.t')) + '.</b> ' + esc(t('f' + i + '.d')) + '</li>').join('');
+  $('#tipsList').innerHTML = [1, 2, 3, 4, 5].map(i => '<li>' + esc(t('tips.' + i)) + '</li>').join('');
+}
+function renderHome() {
+  renderBanners(); renderLatest(); renderAverages(); renderGuide();
+  const list = filterByRange(sortedAsc(), homeBounds());
+  renderRangeStats(list);
+  if (currentView === 'home') drawHomeChart();
+}
+function drawHomeChart() {
+  const list = filterByRange(sortedAsc(), homeBounds());
+  drawChart($('#homeChart'), list, {});
+}
+
+/* ---------- 12. CARTA (Canvas, tanpa pustaka) ---------- */
+function chartColors(light) {
+  if (light) return { sys: '#d6204f', dia: '#2563eb', pul: '#15803d', grid: '#dde5f0', text: '#33445c', ok: '#16a34a', hi: '#dc2626', bg: '#ffffff' };
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  return { sys: g('--c-sys'), dia: g('--c-dia'), pul: g('--c-pul'), grid: g('--grid'), text: g('--muted'), ok: g('--ref-ok'), hi: g('--ref-hi'), bg: g('--card') };
+}
+function marker(ctx, shape, x, y, r) {
+  ctx.beginPath();
+  if (shape === 'sq') ctx.rect(x - r, y - r, 2 * r, 2 * r);
+  else if (shape === 'di') { ctx.moveTo(x, y - r - 1); ctx.lineTo(x + r + 1, y); ctx.lineTo(x, y + r + 1); ctx.lineTo(x - r - 1, y); ctx.closePath(); }
+  else ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+}
+function drawChart(canvas, list, o) {
+  if (!canvas) return;
+  const C = o.colors || chartColors(false), series = o.series || UI.series;
+  const w = o.w || canvas.clientWidth, h = o.h || canvas.clientHeight;
+  if (!w || !h) return;
+  const dpr = o.dpr || window.devicePixelRatio || 1, fs = o.font || 12;
+  canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+  if (o.fillBg) { ctx.fillStyle = C.bg; ctx.fillRect(0, 0, w, h); }
+  canvas._pts = [];
+  if (!list.length) {
+    ctx.fillStyle = C.text; ctx.font = fs + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t('chart.empty'), w / 2, h / 2); return;
+  }
+  const M = { l: 40, r: 14, t: 14, b: 30 }, pw = w - M.l - M.r, ph = h - M.t - M.b;
+  const times = list.map(r => parseDT(r.dt).getTime());
+  let t0 = Math.min.apply(null, times), t1 = Math.max.apply(null, times);
+  if (t1 - t0 < 864e5) { const mid = (t0 + t1) / 2; t0 = mid - 432e5; t1 = mid + 432e5; }
+  const vals = [80, 140];
+  list.forEach(r => { if (series.sys) vals.push(r.sys); if (series.dia) vals.push(r.dia); if (series.pul && r.pulse != null) vals.push(r.pulse); });
+  const y0 = Math.floor((Math.min.apply(null, vals) - 10) / 10) * 10, y1 = Math.ceil((Math.max.apply(null, vals) + 10) / 10) * 10;
+  const X = ti => M.l + 8 + (ti - t0) / (t1 - t0) * (pw - 16), Y = v => M.t + (1 - (v - y0) / (y1 - y0)) * ph;
+  const range = y1 - y0, step = range <= 70 ? 10 : range <= 140 ? 20 : 40;
+
+  // grid + label paksi Y
+  ctx.font = fs + 'px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.lineWidth = 1;
+  for (let v = Math.ceil(y0 / step) * step; v <= y1; v += step) {
+    ctx.strokeStyle = C.grid; ctx.beginPath(); ctx.moveTo(M.l, Y(v) + .5); ctx.lineTo(w - M.r, Y(v) + .5); ctx.stroke();
+    ctx.fillStyle = C.text; ctx.fillText(String(v), M.l - 6, Y(v));
+  }
+  // label paksi X
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const nt = Math.max(2, Math.min(5, Math.floor(pw / 80))), span2d = (t1 - t0) < 2 * 864e5;
+  for (let i = 0; i <= nt; i++) {
+    const tt = t0 + (t1 - t0) * i / nt, d = new Date(tt);
+    ctx.fillStyle = C.text; ctx.fillText(pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + (span2d ? ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) : ''), X(tt), h - M.b + 8);
+  }
+  // garisan rujukan 120/80 dan 140/90
+  const T = CONFIG.thresholds;
+  [[T.elevatedSys, C.ok], [T.h1Dia, C.ok], [T.h2Sys, C.hi], [T.h2Dia, C.hi]].forEach(([v, col]) => {
+    ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = col; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(M.l, Y(v)); ctx.lineTo(w - M.r, Y(v)); ctx.stroke(); ctx.restore();
+    ctx.fillStyle = col; ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText(String(v), w - M.r - 2, Y(v) - 1);
+  });
+  // siri data
+  const defs = [['sys', C.sys, 'ci', r => r.sys], ['dia', C.dia, 'sq', r => r.dia], ['pul', C.pul, 'di', r => r.pulse]];
+  defs.forEach(([k, col, shape, get]) => {
+    if (!series[k]) return;
+    const pts = list.filter(r => get(r) != null).map(r => ({ x: X(parseDT(r.dt).getTime()), y: Y(get(r)), rec: r, key: k, val: get(r) }));
+    ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.lineJoin = 'round'; ctx.beginPath();
+    pts.forEach((p, i) => { if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y); }); ctx.stroke();
+    ctx.fillStyle = col; pts.forEach(p => marker(ctx, shape, p.x, p.y, pts.length > 60 ? 2.2 : 3.6));
+    canvas._pts = canvas._pts.concat(pts);
+  });
+}
+function setupTooltip(canvas, tip) {
+  function show(e) {
+    const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+    let best = null, bd = 26;
+    (canvas._pts || []).forEach(p => { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } });
+    if (!best) { tip.classList.add('hide'); return; }
+    const r = best.rec;
+    tip.innerHTML = '<b>' + fmtDate(r.dt) + ' ' + fmtTime(r.dt) + '</b><br>' + r.sys + '/' + r.dia + (r.pulse != null ? ' · ' + r.pulse + ' bpm' : '') + '<br>' + esc(levelLabel(levelOf(r)));
+    tip.classList.remove('hide');
+    const tw = tip.offsetWidth; tip.style.left = Math.max(2, Math.min(rect.width - tw - 2, best.x - tw / 2)) + 'px'; tip.style.top = Math.max(0, best.y - tip.offsetHeight - 10) + 'px';
+  }
+  canvas.addEventListener('pointerdown', show); canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') show(e); });
+  canvas.addEventListener('pointerleave', () => tip.classList.add('hide'));
+}
+
+/* ---------- 13. BORANG TAMBAH / EDIT ---------- */
+function buildSegs() {
+  Object.keys(OPTS).forEach(name => {
+    $('#seg_' + name).innerHTML = OPTS[name].map(o =>
+      '<label class="chip"><input type="radio" name="' + name + '" value="' + o + '"><span data-i18n="' + name + '.' + o + '">' + esc(t(name + '.' + o)) + '</span></label>').join('');
+  });
+}
+const getRadio = n => { const el = $('input[name="' + n + '"]:checked'); return el ? el.value : ''; };
+const setRadio = (n, v) => { $$('input[name="' + n + '"]').forEach(el => { el.checked = el.value === v; }); };
+function updateFormTitle() { $('#formTitle').textContent = UI.editingId ? t('form.edit') : t('form.add'); }
+function clearErrors() { $$('#bpForm .err').forEach(e => { e.textContent = ''; }); $$('#bpForm input').forEach(i => i.classList.remove('invalid')); }
+
+function startForm(rec) {
+  UI.editingId = rec ? rec.id : null; UI.periodTouched = !!rec;
+  clearErrors(); updateFormTitle();
+  const last = sortedDesc()[0], now = new Date();
+  $('#f_dt').value = rec ? rec.dt : toLocalInput(now);
+  $('#f_sys').value = rec ? rec.sys : ''; $('#f_dia').value = rec ? rec.dia : '';
+  $('#f_pulse').value = rec && rec.pulse != null ? rec.pulse : '';
+  setRadio('period', rec ? rec.period : periodFromHour(now.getHours()));
+  setRadio('arm', rec ? rec.arm : (last ? last.arm : 'left'));
+  setRadio('pos', rec ? rec.pos : (last ? last.pos : 'sit'));
+  setRadio('med', rec ? rec.med : 'none');
+  $('#f_note').value = rec ? rec.note : '';
+  updateLive(); showView('add');
+}
+function updateLive() {
+  const s = num($('#f_sys').value), d = num($('#f_dia').value), V = CONFIG.validation, el = $('#liveClass');
+  if (s != null && d != null && s >= V.sys[0] && s <= V.sys[1] && d >= V.dia[0] && d <= V.dia[1]) {
+    const lv = CONFIG.levels[levelIndex(s, d)];
+    el.innerHTML = badge(lv) + ' <span class="muted" style="font-size:.85rem">' + esc(t('guide.short')) + '</span>' +
+      (lv.key === 'crisis' ? '<div class="crisismsg" role="alert">⚠️ ' + esc(t('crisis.msg')) + '</div>' : '');
+  } else el.innerHTML = '';
+}
+function validateForm() {
+  clearErrors(); const V = CONFIG.validation; let ok = true;
+  const fail = (id, msg) => { $('#e_' + id).textContent = msg; $('#f_' + id).classList.add('invalid'); ok = false; };
+  const dtv = $('#f_dt').value; if (!parseDT(dtv)) fail('dt', dtv ? t('err.dt') : t('err.required'));
+  [['sys', true], ['dia', true], ['pulse', false]].forEach(([k, req]) => {
+    const raw = $('#f_' + k).value.trim();
+    if (raw === '') { if (req) fail(k, t('err.required')); return; }
+    const v = Number(raw);
+    if (!Number.isInteger(v) || v < V[k][0] || v > V[k][1]) fail(k, t('err.range', V[k][0], V[k][1]));
+  });
+  return ok;
+}
+async function submitForm(e) {
+  e.preventDefault();
+  if (!validateForm()) { const bad = $('#bpForm input.invalid'); if (bad) bad.focus(); return; }
+  const sys = Number($('#f_sys').value), dia = Number($('#f_dia').value);
+  if (sys <= dia) {
+    const go = await modal({ title: t('warn.title'), body: t('warn.body', sys, dia), buttons: [{ label: t('warn.fix'), value: false, cls: 'primary' }, { label: t('warn.keep'), value: true }] });
+    if (!go) { $('#f_sys').focus(); return; }
+  }
+  const pr = $('#f_pulse').value.trim();
+  const rec = normRecord({ id: UI.editingId || uid(), dt: $('#f_dt').value, sys, dia, pulse: pr === '' ? null : Number(pr),
+    period: getRadio('period'), arm: getRadio('arm'), pos: getRadio('pos'), med: getRadio('med'), note: $('#f_note').value.trim(), sample: false });
+  if (!rec) return;
+  const editing = !!UI.editingId;
+  if (editing) S.records = S.records.map(r => (r.id === rec.id ? rec : r)); else S.records.push(rec);
+  saveState(); UI.editingId = null; clearErrors();
+  showView(editing ? 'records' : 'home');
+  toast(editing ? t('toast.updated') : t('toast.saved'));
+  if (levelOf(rec).key === 'crisis') modal({ title: '⚠️ ' + t('level.crisis'), cls: 'crisis', html: '<p style="margin:0;font-weight:600">' + esc(t('crisis.msg')) + '</p>' });
+}
+
+/* ---------- 14. SENARAI REKOD ---------- */
+function buildFilterSelects() {
+  const per = $('#rf_period'), cat = $('#rf_cat'), pv = per.value, cv = cat.value;
+  per.innerHTML = '<option value="">' + esc(t('rec.allPeriods')) + '</option>' + OPTS.period.map(p => '<option value="' + p + '">' + esc(t('period.' + p)) + '</option>').join('');
+  cat.innerHTML = '<option value="">' + esc(t('rec.allCats')) + '</option>' + CONFIG.levels.map(l => '<option value="' + l.key + '">' + esc(levelLabel(l)) + '</option>').join('');
+  per.value = pv; cat.value = cv;
+}
+function renderRecords() {
+  const cols = ['dt', 'bp', 'pulse', 'class', 'period', 'arm', 'pos', 'med', 'note', 'act'];
+  $('#recHead').innerHTML = cols.map(c => '<th scope="col">' + esc(t('col.' + c)) + '</th>').join('');
+  const b = rangeBounds('custom', $('#rf_from').value, $('#rf_to').value);
+  const per = $('#rf_period').value, cat = $('#rf_cat').value, q = $('#rf_q').value.trim().toLowerCase();
+  const list = filterByRange(sortedDesc(), b).filter(r => (!per || r.period === per) && (!cat || levelOf(r).key === cat) && (!q || (r.note || '').toLowerCase().indexOf(q) >= 0));
+  $('#recCount').textContent = t('rec.count', list.length);
+  $('#recEmpty').classList.toggle('hide', list.length > 0);
+  $('#recBody').innerHTML = list.map(r => {
+    const lv = levelOf(r), L = c => esc(t('col.' + c));
+    return '<tr>' +
+      '<td data-label="' + L('dt') + '">' + fmtDate(r.dt) + ' ' + fmtTime(r.dt) + (r.sample ? '<span class="tag">' + esc(t('rec.sample')) + '</span>' : '') + '</td>' +
+      '<td data-label="' + L('bp') + '"><span class="bpv">' + r.sys + '/' + r.dia + '</span></td>' +
+      '<td data-label="' + L('pulse') + '">' + (r.pulse != null ? r.pulse : '–') + '</td>' +
+      '<td data-label="' + L('class') + '">' + badge(lv) + '</td>' +
+      '<td data-label="' + L('period') + '">' + esc(t('period.' + r.period)) + '</td>' +
+      '<td data-label="' + L('arm') + '">' + esc(t('arm.' + r.arm)) + '</td>' +
+      '<td data-label="' + L('pos') + '">' + esc(t('pos.' + r.pos)) + '</td>' +
+      '<td data-label="' + L('med') + '">' + esc(t('med.' + r.med)) + '</td>' +
+      '<td data-label="' + L('note') + '">' + esc(r.note) + '</td>' +
+      '<td class="act"><button type="button" class="btn sm" data-act="edit" data-id="' + esc(r.id) + '" aria-label="' + esc(t('rec.edit') + ' ' + fmtDate(r.dt) + ' ' + fmtTime(r.dt)) + '">' + esc(t('rec.edit')) + '</button> ' +
+      '<button type="button" class="btn sm danger" data-act="del" data-id="' + esc(r.id) + '" aria-label="' + esc(t('rec.del') + ' ' + fmtDate(r.dt) + ' ' + fmtTime(r.dt)) + '">' + esc(t('rec.del')) + '</button></td></tr>';
+  }).join('');
+}
+async function deleteRecord(id) {
+  if (!(await confirmBox(t('rec.delTitle'), t('rec.delBody'), t('rec.del'), true))) return;
+  S.records = S.records.filter(r => r.id !== id); saveState(); renderRecords(); renderHome(); toast(t('toast.deleted'));
+}
+
+/* ---------- 15. LAPORAN CETAK ---------- */
+function reportBounds() { return rangeBounds($('#rpRange').value, $('#rpFrom').value, $('#rpTo').value); }
+function renderReport() {
+  const list = filterByRange(sortedAsc(), reportBounds()), P = S.profile, now = new Date();
+  const blank = v => (v ? esc(v) : '________________');
+  const a = avgOf(list), ex = extremes(list);
+  const rangeTxt = list.length ? fmtDate(list[0].dt) + ' – ' + fmtDate(list[list.length - 1].dt) : '–';
+  const gender = P.gender ? t('gender.' + P.gender) : '';
+  const wh = (P.weight ? P.weight + ' kg' : '–') + ' / ' + (P.height ? P.height + ' cm' : '–');
+  let h = '<h2>' + esc(t('rep.heading')) + '</h2><div class="sub">' + esc(t('app.title')) + '</div>' +
+    '<table class="info"><tr><td>' + esc(t('rep.patient')) + '</td><td>' + blank(P.name) + '</td><td>' + esc(t('rep.age')) + '</td><td>' + (P.age ? esc(P.age) + ' ' + esc(t('yrs')) : '–') + '</td></tr>' +
+    '<tr><td>' + esc(t('rep.gender')) + '</td><td>' + (esc(gender) || '–') + '</td><td>' + esc(t('rep.wh')) + '</td><td>' + esc(wh) + '</td></tr>' +
+    '<tr><td>' + esc(t('rep.meds')) + '</td><td colspan="3">' + (esc(P.meds) || '–') + '</td></tr>' +
+    '<tr><td>' + esc(t('rep.doctor')) + '</td><td colspan="3">' + (esc(P.doctor) || '–') + '</td></tr>' +
+    '<tr><td>' + esc(t('rep.range')) + '</td><td>' + rangeTxt + '</td><td>' + esc(t('rep.generated')) + '</td><td>' + fmtDate(now) + ' ' + fmtTime(now) + '</td></tr></table>';
+  if (!list.length) {
+    h += '<p>' + esc(t('rep.noData')) + '</p>';
+  } else {
+    h += '<h3>' + esc(t('rep.summary')) + '</h3><div class="sumgrid">' +
+      '<div>' + esc(t('rep.n')) + '<b>' + a.n + '</b></div>' +
+      '<div>' + esc(t('rep.avgBP')) + '<b>' + r0(a.sys) + '/' + r0(a.dia) + '</b></div>' +
+      '<div>' + esc(t('rep.avgPulse')) + '<b>' + r0(a.pulse) + ' bpm</b></div>' +
+      '<div>' + esc(t('rep.hi')) + ' / ' + esc(t('rep.lo')) + '<b>' + ex.hi.sys + '/' + ex.hi.dia + ' · ' + ex.lo.sys + '/' + ex.lo.dia + '</b></div></div>' +
+      '<p style="margin:.6em 0 0"><b>' + esc(t('rep.cats')) + ':</b> ' + CONFIG.levels.map((lv, i) => badge(lv) + ' ' + list.filter(r => levelIndex(r.sys, r.dia) === i).length).join(' &nbsp; ') + '</p>' +
+      '<h3>' + esc(t('rep.chart')) + '</h3><img class="chartimg" alt="' + esc(t('aria.chart')) + '" src="' + reportChartURL(list) + '">' +
+      '<h3>' + esc(t('rep.table')) + '</h3><table class="t"><thead><tr><th>#</th><th>' + esc(t('col.dt')) + '</th><th>' + esc(t('col.period')) + '</th><th>' + esc(t('col.bp')) + '</th><th>' + esc(t('col.pulse')) + '</th><th>' + esc(t('col.class')) + '</th><th>' + esc(t('col.arm')) + '</th><th>' + esc(t('col.pos')) + '</th><th>' + esc(t('col.med')) + '</th><th>' + esc(t('col.note')) + '</th></tr></thead><tbody>' +
+      list.map((r, i) => '<tr><td>' + (i + 1) + '</td><td>' + fmtDate(r.dt) + ' ' + fmtTime(r.dt) + '</td><td>' + esc(t('period.' + r.period)) + '</td><td><b>' + r.sys + '/' + r.dia + '</b></td><td>' + (r.pulse != null ? r.pulse : '–') + '</td><td>' + badge(levelOf(r)) + '</td><td>' + esc(t('arm.' + r.arm)) + '</td><td>' + esc(t('pos.' + r.pos)) + '</td><td>' + esc(t('med.' + r.med)) + '</td><td>' + esc(r.note) + '</td></tr>').join('') + '</tbody></table>';
+  }
+  h += '<div class="sign"><div>' + esc(t('rep.signP')) + '<br>' + esc(t('rep.date')) + ': ____ / ____ / ________</div><div>' + esc(t('rep.signD')) + '<br>' + esc(t('rep.date')) + ': ____ / ____ / ________</div></div>' +
+    '<div class="disc"><b>' + esc(t('rep.classNote')) + '</b> ' + esc(t('disclaimer')) + '</div>';
+  $('#paper').innerHTML = h;
+}
+function reportChartURL(list) {
+  try {
+    const c = document.createElement('canvas');
+    drawChart(c, list, { w: 740, h: 270, dpr: 2, colors: chartColors(true), fillBg: true, font: 12, series: { sys: true, dia: true, pul: true } });
+    return c.toDataURL('image/png');
+  } catch (e) { return ''; }
+}
+
+/* ---------- 15b. PENJANA PDF (tanpa pustaka, tulis format PDF sendiri) ---------- */
+// Lebar aksara Helvetica (ASCII 32..126, per 1000 unit)
+const HELV = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+function pdfSan(s) {
+  return String(s == null ? '' : s).replace(/[\r\n\t]+/g, ' ').replace(/[–—]/g, '-').replace(/≥/g, '>=').replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+    .replace(/[^\x20-\xFF]/g, '?');
+}
+function pdfTW(s, sz, bold) {
+  let w = 0; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); w += (c >= 32 && c <= 126 ? HELV[c - 32] : 556); }
+  return w * sz / 1000 * (bold ? 1.06 : 1);
+}
+function pdfWrap(s, maxW, sz, bold) {
+  s = pdfSan(s); const lines = []; let cur = '';
+  s.split(' ').forEach(word => {
+    while (pdfTW(word, sz, bold) > maxW && word.length > 1) { // pecahkan perkataan panjang
+      let k = word.length - 1; while (k > 1 && pdfTW(word.slice(0, k), sz, bold) > maxW) k--;
+      if (cur) { lines.push(cur); cur = ''; }
+      lines.push(word.slice(0, k)); word = word.slice(k);
+    }
+    const tryS = cur ? cur + ' ' + word : word;
+    if (pdfTW(tryS, sz, bold) <= maxW) cur = tryS; else { if (cur) lines.push(cur); cur = word; }
+  });
+  lines.push(cur); return lines;
+}
+function pdfRGB(hex) { const n = parseInt(hex.slice(1), 16); return ((n >> 16) / 255).toFixed(3) + ' ' + (((n >> 8) & 255) / 255).toFixed(3) + ' ' + ((n & 255) / 255).toFixed(3); }
+const pdfEsc = s => pdfSan(s).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+
+function buildReportPDF() {
+  const list = filterByRange(sortedAsc(), reportBounds()), P = S.profile, now = new Date();
+  const PW = 595.28, PH = 841.89, MX = 40, MT = 40, MB = 50, CW = PW - 2 * MX;
+  const pages = []; let cur = null, y = 0, img = null;
+  const newPage = () => { cur = []; pages.push(cur); y = MT; };
+  const ensure = h => { if (y + h > PH - MB) { newPage(); return true; } return false; };
+  const txt = (x, yt, s, sz, bold, color) => cur.push('BT /' + (bold ? 'F2' : 'F1') + ' ' + sz + ' Tf ' + pdfRGB(color || '#000000') + ' rg ' + x.toFixed(2) + ' ' + (PH - yt - sz * 0.8).toFixed(2) + ' Td (' + pdfEsc(s) + ') Tj ET');
+  const rect = (x, yt, w, h, fill, stroke) => {
+    const r = x.toFixed(2) + ' ' + (PH - yt - h).toFixed(2) + ' ' + w.toFixed(2) + ' ' + h.toFixed(2) + ' re';
+    if (fill) cur.push(pdfRGB(fill) + ' rg ' + r + ' f');
+    if (stroke) cur.push(pdfRGB(stroke) + ' RG 0.6 w ' + r + ' S');
+  };
+  const hline = (x1, x2, yt, color, wd) => cur.push(pdfRGB(color || '#000000') + ' RG ' + (wd || 0.6) + ' w ' + x1.toFixed(2) + ' ' + (PH - yt).toFixed(2) + ' m ' + x2.toFixed(2) + ' ' + (PH - yt).toFixed(2) + ' l S');
+  const heading = s => { ensure(30); y += 8; txt(MX, y, s, 11, true, '#0b2f57'); y += 14; hline(MX, PW - MX, y, '#0b3a6b', 1.2); y += 6; };
+
+  newPage();
+  // Tajuk
+  let s1 = t('rep.heading'); txt((PW - pdfTW(pdfSan(s1), 16, true)) / 2, y, s1, 16, true, '#0b2f57'); y += 22;
+  s1 = t('app.title'); txt((PW - pdfTW(pdfSan(s1), 9, false)) / 2, y, s1, 9, false, '#444444'); y += 18;
+
+  // Maklumat pesakit (dua lajur)
+  const colW = CW / 2 - 6, gender = P.gender ? t('gender.' + P.gender) : '–';
+  const rangeTxt = list.length ? fmtDate(list[0].dt) + ' - ' + fmtDate(list[list.length - 1].dt) : '-';
+  const kv = (x, yt, w, label, val) => {
+    const lw = pdfTW(pdfSan(label) + ' ', 9, true) + 4, lines = pdfWrap(val || '-', w - lw, 9, false);
+    txt(x, yt, label, 9, true); lines.forEach((l, i) => txt(x + lw, yt + i * 11, l, 9, false)); return lines.length * 11;
+  };
+  const pair = (a, b) => { ensure(24); const h1 = kv(MX, y, colW, a[0] + ':', a[1]), h2 = b ? kv(MX + CW / 2, y, colW, b[0] + ':', b[1]) : 0; y += Math.max(h1, h2) + 3; };
+  const full = (a) => { ensure(24); y += kv(MX, y, CW, a[0] + ':', a[1]) + 3; };
+  pair([t('rep.patient'), P.name || '________________'], [t('rep.age'), P.age ? P.age + ' ' + t('yrs') : '-']);
+  pair([t('rep.gender'), gender], [t('rep.wh'), (P.weight ? P.weight + ' kg' : '-') + ' / ' + (P.height ? P.height + ' cm' : '-')]);
+  full([t('rep.meds'), P.meds || '-']); full([t('rep.doctor'), P.doctor || '-']);
+  pair([t('rep.range'), rangeTxt], [t('rep.generated'), fmtDate(now) + ' ' + fmtTime(now)]);
+
+  if (!list.length) { y += 8; txt(MX, y, t('rep.noData'), 10, false); y += 16; }
+  else {
+    const a = avgOf(list), ex = extremes(list);
+    heading(t('rep.summary'));
+    const bw = (CW - 18) / 4, boxes = [[t('rep.n'), String(a.n)], [t('rep.avgBP'), r0(a.sys) + '/' + r0(a.dia)], [t('rep.avgPulse'), r0(a.pulse) + ' bpm'], [t('rep.hi') + ' | ' + t('rep.lo'), ex.hi.sys + '/' + ex.hi.dia + ' | ' + ex.lo.sys + '/' + ex.lo.dia]];
+    ensure(40);
+    boxes.forEach((b, i) => { const x = MX + i * (bw + 6); rect(x, y, bw, 34, null, '#9aa8bd'); txt(x + 5, y + 4, b[0], 7.5, false, '#444444'); txt(x + 5, y + 16, b[1], 11, true); });
+    y += 42;
+    // kiraan kategori
+    ensure(22); let x = MX; txt(x, y + 3, t('rep.cats') + ':', 8.5, true); x += pdfTW(pdfSan(t('rep.cats')) + ':', 8.5, true) + 6;
+    CONFIG.levels.forEach((lv, i) => {
+      const lab = t('level.' + lv.key), w = pdfTW(pdfSan(lab), 7.5, true) + 10, n = list.filter(r => levelIndex(r.sys, r.dia) === i).length, cw = pdfTW(String(n), 8.5, true) + 8;
+      if (x + w + cw > PW - MX) { x = MX; y += 15; ensure(16); }
+      rect(x, y, w, 13, lv.bg); txt(x + 5, y + 2.5, lab, 7.5, true, lv.fg); txt(x + w + 3, y + 2, String(n), 8.5, true); x += w + cw + 6;
+    });
+    y += 18;
+
+    // Carta
+    try {
+      const c = document.createElement('canvas');
+      drawChart(c, list, { w: 740, h: 270, dpr: 2, colors: chartColors(true), fillBg: true, font: 12, series: { sys: true, dia: true, pul: true } });
+      const bin = atob(c.toDataURL('image/jpeg', 0.92).split(',')[1]);
+      img = { data: bin, w: c.width, h: c.height };
+    } catch (e) { img = null; }
+    if (img) {
+      const ih = CW * img.h / img.w; heading(t('rep.chart')); ensure(ih + 4);
+      cur.push('q ' + CW.toFixed(2) + ' 0 0 ' + ih.toFixed(2) + ' ' + MX + ' ' + (PH - y - ih).toFixed(2) + ' cm /Im1 Do Q'); y += ih + 4;
+    }
+
+    // Jadual
+    heading(t('rep.table'));
+    const cols = [['#', 18], ['col.dt', 76], ['col.period', 46], ['col.bp', 46], ['col.pulse', 28], ['col.class', 92], ['col.arm', 34], ['col.pos', 42], ['col.med', 62]];
+    cols.push(['col.note', CW - cols.reduce((s, c) => s + c[1], 0)]);
+    const FS = 7.5, LH = 9;
+    const header = () => {
+      rect(MX, y, CW, 15, '#e6edf6', '#9aa8bd'); let x = MX;
+      cols.forEach(c => { txt(x + 3, y + 3.5, c[0] === '#' ? '#' : t(c[0]), FS, true); x += c[1]; }); y += 15;
+    };
+    header();
+    list.forEach((r, i) => {
+      const lv = levelOf(r), cells = [String(i + 1), fmtDate(r.dt) + ' ' + fmtTime(r.dt), t('period.' + r.period), r.sys + '/' + r.dia, r.pulse != null ? String(r.pulse) : '-', t('level.' + lv.key), t('arm.' + r.arm), t('pos.' + r.pos), t('med.' + r.med), r.note || ''];
+      const wrapped = cells.map((c, k) => pdfWrap(c, cols[k][1] - 6, FS, k === 3), 0);
+      const rh = Math.max.apply(null, wrapped.map(l => l.length)) * LH + 6;
+      if (ensure(rh)) header();
+      let x = MX;
+      cols.forEach((c, k) => {
+        rect(x, y, c[1], rh, k === 5 ? null : null, '#9aa8bd');
+        if (k === 5) { rect(x + 2, y + 2, c[1] - 4, rh - 4, lv.bg); wrapped[k].forEach((l, j) => txt(x + 4, y + 3.5 + j * LH, l, FS, true, lv.fg)); }
+        else wrapped[k].forEach((l, j) => txt(x + 3, y + 3.5 + j * LH, l, FS, k === 3, '#000000'));
+        x += c[1];
+      });
+      y += rh;
+    });
+  }
+
+  // Tandatangan
+  ensure(90); y += 44;
+  const sw = (CW - 40) / 2;
+  [[MX, t('rep.signP')], [MX + sw + 40, t('rep.signD')]].forEach(([x, lab]) => {
+    hline(x, x + sw, y, '#000000', 0.8); txt(x + (sw - pdfTW(pdfSan(lab), 8.5, false)) / 2, y + 3, lab, 8.5, false);
+    const d = t('rep.date') + ': ____ / ____ / ________'; txt(x + (sw - pdfTW(pdfSan(d), 8.5, false)) / 2, y + 15, d, 8.5, false);
+  });
+  y += 36;
+  // Penafian
+  const dl = pdfWrap(t('rep.classNote') + ' ' + t('disclaimer'), CW - 14, 8, false), dh = dl.length * 10 + 10;
+  ensure(dh + 4); rect(MX, y, CW, dh, '#f6f6f6', '#888888'); dl.forEach((l, i) => txt(MX + 7, y + 5 + i * 10, l, 8, false, '#222222')); y += dh;
+  // Nombor halaman
+  pages.forEach((p, i) => { cur = p; const s = t('rep.page') + ' ' + (i + 1) + '/' + pages.length; txt(PW - MX - pdfTW(pdfSan(s), 8, false), PH - 30, s, 8, false, '#555555'); });
+
+  // Susun objek PDF
+  let out = '%PDF-1.4\n', offs = [];
+  const add = body => { offs.push(out.length); out += offs.length + ' 0 obj\n' + body + '\nendobj\n'; };
+  const nImg = img ? 1 : 0, p0 = 5 + nImg;
+  add('<< /Type /Catalog /Pages 2 0 R >>');
+  add('<< /Type /Pages /Count ' + pages.length + ' /Kids [' + pages.map((_, i) => (p0 + 2 * i) + ' 0 R').join(' ') + '] >>');
+  add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  if (img) add('<< /Type /XObject /Subtype /Image /Width ' + img.w + ' /Height ' + img.h + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + img.data.length + ' >>\nstream\n' + img.data + '\nendstream');
+  const res = '<< /Font << /F1 3 0 R /F2 4 0 R >>' + (img ? ' /XObject << /Im1 5 0 R >>' : '') + ' >>';
+  pages.forEach((p, i) => {
+    add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + PW + ' ' + PH + '] /Resources ' + res + ' /Contents ' + (p0 + 2 * i + 1) + ' 0 R >>');
+    const body = p.join('\n'); add('<< /Length ' + body.length + ' >>\nstream\n' + body + '\nendstream');
+  });
+  const xr = out.length;
+  out += 'xref\n0 ' + (offs.length + 1) + '\n0000000000 65535 f \n' + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('') +
+    'trailer\n<< /Size ' + (offs.length + 1) + ' /Root 1 0 R >>\nstartxref\n' + xr + '\n%%EOF';
+  const bytes = new Uint8Array(out.length); for (let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+  return new Blob([bytes], { type: 'application/pdf' });
+}
+function pdfAction(mode) {
+  let blob; try { blob = buildReportPDF(); } catch (e) { console.warn(e); toast(t('rep.pdfFail'), 4000); return; }
+  const url = URL.createObjectURL(blob), name = 'laporan-bp-' + dayKey(new Date()) + '.pdf';
+  if (mode === 'preview') {
+    let w = null; try { w = window.open(url, '_blank'); } catch (e) { w = null; }
+    if (!w) { toast(t('rep.pdfPopup'), 4500); mode = 'download'; }
+  }
+  if (mode === 'download') { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
+
+/* ---------- 16. EKSPORT / IMPORT / BACKUP ---------- */
+function download(name, text, mime) {
+  try {
+    const blob = new Blob([text], { type: mime }), url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000); toast(t('io.exported'));
+  } catch (e) { toast(t('io.badFile')); }
+}
+function csvCell(v) { v = v == null ? '' : String(v); return /[",;\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function exportCSV() {
+  const head = ['Tarikh', 'Masa', 'Sistolik', 'Diastolik', 'Nadi', 'Waktu', 'Lengan', 'Posisi', 'Status ubat', 'Catatan', 'Kategori'];
+  const rows = sortedAsc().map(r => [r.dt.slice(0, 10), r.dt.slice(11, 16), r.sys, r.dia, r.pulse == null ? '' : r.pulse,
+    I18N.ms['period.' + r.period], I18N.ms['arm.' + r.arm], I18N.ms['pos.' + r.pos], I18N.ms['med.' + r.med], r.note, I18N.ms['level.' + levelOf(r).key]]);
+  const txt = '﻿' + [head].concat(rows).map(r => r.map(csvCell).join(',')).join('\r\n');
+  download('rekod-bp-' + dayKey(new Date()) + '.csv', txt, 'text/csv;charset=utf-8');
+}
+function exportBackup() {
+  const o = { app: 'rekod-bp', version: 1, exported: new Date().toISOString(), profile: S.profile, settings: { lang: S.settings.lang, theme: S.settings.theme, remind: S.settings.remind }, records: sortedAsc() };
+  download('backup-bp-' + dayKey(new Date()) + '.json', JSON.stringify(o, null, 2), 'application/json');
+}
+function parseCSV(text) {
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '', delim = first.indexOf(',') < 0 && first.indexOf(';') >= 0 ? ';' : ',';
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === delim) { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); cur = ''; if (row.some(x => x !== '')) rows.push(row); row = []; }
+    else cur += c;
+  }
+  row.push(cur); if (row.some(x => x !== '')) rows.push(row);
+  return rows;
+}
+function labelMap(group) {
+  const m = {}; OPTS[group].forEach(k => { m[k] = k; ['ms', 'en'].forEach(l => { m[I18N[l][group + '.' + k].toLowerCase()] = k; }); }); return m;
+}
+function csvToRecords(text) {
+  const rows = parseCSV(text); if (rows.length < 2) return [];
+  const alias = { date: ['tarikh', 'date'], time: ['masa', 'time'], sys: ['sistolik', 'systolic', 'sys'], dia: ['diastolik', 'diastolic', 'dia'], pulse: ['nadi', 'pulse'],
+    period: ['waktu', 'time of day', 'period'], arm: ['lengan', 'arm'], pos: ['posisi', 'position'], med: ['status ubat', 'medication status', 'ubat', 'medication'], note: ['catatan', 'notes', 'note'] };
+  const hdr = rows[0].map(h => h.trim().toLowerCase()), idx = {};
+  Object.keys(alias).forEach(k => { idx[k] = hdr.findIndex(h => alias[k].indexOf(h) >= 0); });
+  const maps = { period: labelMap('period'), arm: labelMap('arm'), pos: labelMap('pos'), med: labelMap('med') };
+  const get = (r, k) => (idx[k] >= 0 ? (r[idx[k]] || '').trim() : '');
+  return rows.slice(1).map(r => {
+    let ds = get(r, 'date'), m;
+    if ((m = /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/.exec(ds))) ds = m[3] + '-' + pad(+m[2]) + '-' + pad(+m[1]);
+    let ts = get(r, 'time'); if ((m = /^(\d{1,2}):(\d{2})/.exec(ts))) ts = pad(+m[1]) + ':' + m[2]; else ts = '00:00';
+    const pv = k => maps[k][get(r, k).toLowerCase()];
+    return normRecord({ dt: ds + 'T' + ts, sys: get(r, 'sys'), dia: get(r, 'dia'), pulse: get(r, 'pulse') === '' ? null : get(r, 'pulse'),
+      period: pv('period'), arm: pv('arm'), pos: pv('pos'), med: pv('med'), note: get(r, 'note') });
+  });
+}
+async function handleFile(file) {
+  if (!file) return;
+  let text; try { text = await file.text(); } catch (e) { toast(t('io.badFile')); return; }
+  const isJSON = /\.json$/i.test(file.name) || /^\s*[\[{]/.test(text);
+  let recs = [], obj = null;
+  try {
+    if (isJSON) { obj = JSON.parse(text); recs = (Array.isArray(obj) ? obj : obj.records || []).map(normRecord); }
+    else { if (UI.importMode === 'restore') { toast(t('io.csvOnlyImport'), 4000); return; } recs = csvToRecords(text); }
+  } catch (e) { toast(t('io.badFile')); return; }
+  const valid = recs.filter(Boolean);
+  if (!valid.length && !(obj && obj.profile)) { toast(t('io.badFile')); return; }
+  if (UI.importMode === 'restore') {
+    if (!(await confirmBox(t('io.restoreTitle'), t('io.restoreBody', valid.length), t('io.restoreBtn'), true))) return;
+    S.records = valid;
+    if (obj && obj.profile) S.profile = Object.assign(DEFAULTS().profile, obj.profile);
+    if (obj && obj.settings && obj.settings.remind) S.settings.remind = Object.assign(DEFAULTS().settings.remind, obj.settings.remind, { last: {} });
+    S.settings.sampleLoaded = true; saveState(); renderAll(); toast(t('io.restored', valid.length));
+  } else {
+    const keyOf = r => r.dt + '|' + r.sys + '|' + r.dia, have = new Set(S.records.map(keyOf)); let added = 0;
+    valid.forEach(r => { if (!have.has(keyOf(r))) { have.add(keyOf(r)); if (S.records.some(x => x.id === r.id)) r.id = uid(); S.records.push(r); added++; } });
+    S.settings.sampleLoaded = true; saveState(); renderAll(); toast(t('io.imported', added, recs.length - added), 4000);
+  }
+}
+
+/* ---------- 17. DATA CONTOH ---------- */
+function makeSample() {
+  let seed = 20260607;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const rr = (a, b) => Math.round(a + rnd() * (b - a));
+  const now = new Date(), out = [];
+  for (let i = CONFIG.sampleDays - 1; i >= 0; i--) {
+    const base = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const mk = (period, hh, mm, sys, dia, pulse, note) => {
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate(), hh, mm);
+      if (d > now) return;
+      out.push({ id: 's' + i + period, dt: toLocalInput(d), sys, dia, pulse, period, arm: 'left', pos: 'sit', med: period === 'morning' ? 'before' : 'after', note: note || '', sample: true });
+    };
+    mk('morning', 7, rr(0, 25), rr(128, 148), rr(78, 92), rr(68, 82), i % 5 === 0 ? t('sample.n1') : i % 7 === 3 ? t('sample.n4') : '');
+    mk('night', 21, rr(0, 25), rr(114, 138), rr(70, 86), rr(64, 78), i % 4 === 1 ? t('sample.n2') : i % 6 === 2 ? t('sample.n3') : '');
+  }
+  return out.map(normRecord).filter(Boolean);
+}
+async function deleteSample() {
+  const n = S.records.filter(r => r.sample).length;
+  if (!n) { toast(t('sample.none')); return; }
+  S.records = S.records.filter(r => !r.sample); saveState(); renderAll(); toast(t('sample.deleted', n));
+}
+
+/* ---------- 18. TETAPAN & PROFIL ---------- */
+function renderSettings() {
+  const P = S.profile;
+  $('#p_name').value = P.name || ''; $('#p_age').value = P.age || ''; $('#p_gender').value = P.gender || '';
+  $('#p_weight').value = P.weight || ''; $('#p_height').value = P.height || ''; $('#p_meds').value = P.meds || ''; $('#p_doctor').value = P.doctor || '';
+  const R = S.settings.remind;
+  $('#r_on').checked = !!R.on; $('#r_morning').value = R.morning; $('#r_evening').value = R.evening;
+  updateNotifStatus(); $('#s_lang').value = LANG; $('#s_theme').value = S.settings.theme || 'auto';
+}
+function saveProfile() {
+  S.profile = { name: $('#p_name').value.trim(), age: $('#p_age').value.trim(), gender: $('#p_gender').value, weight: $('#p_weight').value.trim(),
+    height: $('#p_height').value.trim(), meds: $('#p_meds').value.trim(), doctor: $('#p_doctor').value.trim() };
+  saveState(); renderReport(); toast(t('toast.profile'));
+}
+
+/* ---------- 19. PERINGATAN ---------- */
+function notifSupported() { try { return 'Notification' in window; } catch (e) { return false; } }
+function updateNotifStatus() {
+  let k = 'unsupported'; if (notifSupported()) k = Notification.permission === 'granted' ? 'granted' : Notification.permission === 'denied' ? 'denied' : 'default';
+  $('#notifStatus').textContent = t('notif.' + k);
+}
+function askNotifPermission() {
+  if (!notifSupported()) return Promise.resolve();
+  try { return Promise.resolve(Notification.requestPermission()).catch(() => {}).then(updateNotifStatus); } catch (e) { return Promise.resolve(); }
+}
+function notify(body) {
+  try { if (notifSupported() && Notification.permission === 'granted') new Notification(t('remind.title'), { body }); } catch (e) { /* abaikan */ }
+  toast('🔔 ' + body, 7000);
+}
+function checkReminders() {
+  const R = S.settings.remind; if (!R.on) return;
+  const now = new Date(), hm = pad(now.getHours()) + ':' + pad(now.getMinutes()), today = dayKey(now);
+  ['morning', 'evening'].forEach(k => {
+    if (R[k] !== hm || R.last[k] === today) return;
+    R.last[k] = today; saveState();
+    const has = S.records.some(r => r.dt.slice(0, 10) === today && !r.sample && (k === 'morning' ? r.period === 'morning' : r.period === 'evening' || r.period === 'night'));
+    if (!has) notify(t('remind.' + k));
+  });
+}
+
+/* ---------- 20. PEMASANGAN PENDengar ACARA & MULA ---------- */
+function bindRange(selId, fromId, toId, boxFrom, boxTo, cb) {
+  const upd = () => { const c = $('#' + selId).value === 'custom'; $('#' + boxFrom).classList.toggle('hide', !c); $('#' + boxTo).classList.toggle('hide', !c); cb(); };
+  [selId, fromId, toId].forEach(id => $('#' + id).addEventListener('change', upd));
+}
+function init() {
+  loadState();
+  if (!S.records.length && !S.settings.sampleLoaded) { LANG = S.settings.lang === 'en' ? 'en' : 'ms'; S.records = makeSample(); S.settings.sampleLoaded = true; saveState(); }
+  LANG = S.settings.lang === 'en' ? 'en' : 'ms';
+  buildSegs();
+
+  // navigasi
+  $$('#nav button').forEach(b => b.addEventListener('click', () => { if (b.dataset.view === 'add') startForm(null); else showView(b.dataset.view); }));
+  $('#btnLang').addEventListener('click', () => { S.settings.lang = LANG === 'ms' ? 'en' : 'ms'; saveState(); applyLang(); });
+  $('#btnTheme').addEventListener('click', () => { S.settings.theme = effectiveTheme() === 'dark' ? 'light' : 'dark'; saveState(); applyTheme(); });
+  $('#s_lang').addEventListener('change', e => { S.settings.lang = e.target.value; saveState(); applyLang(); });
+  $('#s_theme').addEventListener('change', e => { S.settings.theme = e.target.value === 'auto' ? null : e.target.value; saveState(); applyTheme(); });
+
+  // utama
+  bindRange('homeRange', 'hrFrom', 'hrTo', 'hrFromBox', 'hrToBox', renderHome);
+  $('#chartToggles').addEventListener('change', e => { const k = e.target.getAttribute('data-ser'); if (k) { UI.series[k] = e.target.checked; drawHomeChart(); } });
+  $('#banners').addEventListener('click', e => { const a = e.target.closest('[data-act]'); if (!a) return; if (a.dataset.act === 'goAdd') startForm(null); if (a.dataset.act === 'delSample') deleteSample(); });
+  setupTooltip($('#homeChart'), $('#homeTip'));
+
+  // borang
+  $('#bpForm').addEventListener('submit', submitForm);
+  ['f_sys', 'f_dia'].forEach(id => $('#' + id).addEventListener('input', updateLive));
+  $('#f_dt').addEventListener('change', () => { if (!UI.periodTouched) { const d = parseDT($('#f_dt').value); if (d) setRadio('period', periodFromHour(d.getHours())); } });
+  $$('input[name="period"]').forEach(r => r.addEventListener('change', () => { UI.periodTouched = true; }));
+  $('#btnCancel').addEventListener('click', () => { UI.editingId = null; clearErrors(); showView(S.records.length ? 'home' : 'home'); });
+
+  // rekod
+  ['rf_from', 'rf_to', 'rf_period', 'rf_cat'].forEach(id => $('#' + id).addEventListener('change', renderRecords));
+  $('#rf_q').addEventListener('input', renderRecords);
+  $('#rfReset').addEventListener('click', () => { ['rf_from', 'rf_to', 'rf_period', 'rf_cat', 'rf_q'].forEach(id => { $('#' + id).value = ''; }); renderRecords(); });
+  $('#recBody').addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return; const id = b.dataset.id;
+    if (b.dataset.act === 'edit') { const r = S.records.find(x => x.id === id); if (r) startForm(r); }
+    if (b.dataset.act === 'del') deleteRecord(id);
+  });
+
+  // laporan
+  bindRange('rpRange', 'rpFrom', 'rpTo', 'rpFromBox', 'rpToBox', renderReport);
+  $('#btnPrint').addEventListener('click', () => { renderReport(); setTimeout(() => { try { window.print(); } catch (e) { toast('Print tidak tersedia'); } }, 80); });
+  $('#btnCsv').addEventListener('click', exportCSV);
+  $('#btnPdfPreview').addEventListener('click', () => pdfAction('preview'));
+  $('#btnPdfDownload').addEventListener('click', () => pdfAction('download'));
+  $('#btnBackup').addEventListener('click', exportBackup);
+  $('#btnRestore').addEventListener('click', () => { UI.importMode = 'restore'; $('#fileIn').click(); });
+  $('#btnImport').addEventListener('click', () => { UI.importMode = 'merge'; $('#fileIn').click(); });
+  $('#fileIn').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; handleFile(f); });
+  window.addEventListener('beforeprint', renderReport);
+
+  // tetapan
+  $('#btnProfile').addEventListener('click', saveProfile);
+  $('#r_on').addEventListener('change', e => { S.settings.remind.on = e.target.checked; saveState(); if (e.target.checked) askNotifPermission(); });
+  $('#r_morning').addEventListener('change', e => { S.settings.remind.morning = e.target.value || '07:30'; saveState(); });
+  $('#r_evening').addEventListener('change', e => { S.settings.remind.evening = e.target.value || '21:00'; saveState(); });
+  $('#btnTestRemind').addEventListener('click', () => askNotifPermission().then(() => notify(t('remind.test'))));
+  $('#btnDelSample').addEventListener('click', deleteSample);
+  $('#btnLoadSample').addEventListener('click', () => {
+    const have = new Set(S.records.map(r => r.dt + '|' + r.sys)); let n = 0;
+    makeSample().forEach(r => { if (!have.has(r.dt + '|' + r.sys)) { if (S.records.some(x => x.id === r.id)) r.id = uid(); S.records.push(r); n++; } });
+    saveState(); renderAll(); toast(t('sample.loaded'));
+  });
+  $('#btnDelAll').addEventListener('click', async () => {
+    if (!(await confirmBox(t('delall.title'), t('delall.body'), t('set.delAll'), true))) return;
+    S.records = []; S.profile = DEFAULTS().profile; S.settings.sampleLoaded = true; saveState(); renderAll(); toast(t('delall.done'));
+  });
+
+  // tema, lulus peranti, saiz semula
+  try { const mq = window.matchMedia('(prefers-color-scheme: dark)'); (mq.addEventListener ? mq.addEventListener('change', () => { if (!S.settings.theme) applyTheme(); }) : mq.addListener && mq.addListener(() => { if (!S.settings.theme) applyTheme(); })); } catch (e) { /* abaikan */ }
+  let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (currentView === 'home') drawHomeChart(); }, 150); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && currentView === 'home') renderHome(); });
+
+  applyTheme(); applyLang(); showView('home');
+  setInterval(checkReminders, 20000);
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
