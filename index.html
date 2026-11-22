@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b2f57">
 <title>Rekod Bacaan Tekanan Darah (BP)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rekod BP">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b3a6b'/%3E%3Cpath d='M32 50C14 38 12 24 20 18c5-4 10-1 12 3 2-4 7-7 12-3 8 6 6 20-12 32z' fill='white'/%3E%3C/svg%3E">
 <style>
 /* ====== Pemboleh ubah tema ====== */
@@ -1607,6 +1612,10 @@ function init() {
   setInterval(checkReminders, 20000);
 }
 document.addEventListener('DOMContentLoaded', init);
+// Daftar service worker (hanya pada http/https) supaya boleh dipasang sebagai aplikasi
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* abaikan */ } });
+}
 </script>
 </body>
 </html>
